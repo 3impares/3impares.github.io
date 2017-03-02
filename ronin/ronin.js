@@ -87,8 +87,6 @@ function act(){
 			// Change Direction
 			if (lastPress == KEY_UP) {
 				dir = 0;
-				ctx.restore();
-				ctx.rotate(Math.PI/2);
 			} 
 			if (lastPress == KEY_RIGHT) dir = 1;
 			if (lastPress == KEY_DOWN)  dir = 2;
