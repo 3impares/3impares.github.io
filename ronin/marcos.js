@@ -1,14 +1,20 @@
 
- window.addEventListener('load', start, false); 
+window.addEventListener('load', start, false); 
 
 var Ronin=Ronin || {};
 
+var r;
 
 function start(){
-	var r=new Ronin();
+	r=new Ronin();
 
 	r.init();
 }
+
+canvas.addEventListener('mousemove', function(evt) {
+        var mouse = getMouse(canvas, evt);
+        r.rotate(mouse);
+}, false);
 
 Ronin = function(){
 
@@ -17,7 +23,7 @@ Ronin = function(){
 	this.s=new Image();
 	this.canvas;
 	this.ctx;
-	
+	this.x=0;
 
 	this.init=function(){
 
@@ -25,15 +31,36 @@ Ronin = function(){
 		this.canvas = document.getElementById('canvas');
 		this.ctx = canvas.getContext('2d');
 
-		this.loop();
+		this.ctx.drawImage(this.s, canvas.width/2, canvas.height/2,100,50);
+		this.ctx.restore();
+		//this.loop();
 	};
 	
 	this.draw=function(){
 	
 		this.ctx.drawImage(this.s, canvas.width/2, canvas.height/2,100,50);
+
 	
 	};
-	
+	this.trigonometry=function(x, y){
+
+		return Math.asin(y/Math.sqrt(x*x+y*y));
+
+	};
+	this.rotate=function(mouse){
+		this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+		this.ctx.save();
+
+		var angle=this.trigonometry(mouse.x, mouse.y);
+		
+		this.ctx.rotate(angle);
+		this.x++;
+    	
+    	this.ctx.drawImage(this.s, canvas.width/2, canvas.height/2,100,50);
+    	this.ctx.restore();
+
+		console.log(angle+" "+mouse.x+" "+mouse.y);
+	};
 	this.loop=function(){
 		//window.requestAnimationFrame(this.loop());
 		this.draw();
@@ -41,13 +68,20 @@ Ronin = function(){
 	
 		var interval=setInterval(function(){
 			self.draw();
-		}, 20);
+		}, 500);
 
 	};
 	
 	
 };
 
+function getMouse(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+	};
+}
 
 
 HattoriHanzo = function(){
@@ -61,13 +95,7 @@ HattoriHanzo = function(){
 
 /*
 
-function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
-    return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
-	};
-}
+
 
 var canvas = document.getElementById('myCanvas');
 var context = canvas.getContext('2d');
