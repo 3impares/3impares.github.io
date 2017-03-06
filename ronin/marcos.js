@@ -35,14 +35,14 @@ Ronin = function(){
 	};
 	
 	this.loop=function(){
-		window.requestAnimationFrame(this.loop());
+		//window.requestAnimationFrame(this.loop());
 		this.draw();
-		/*var self=this;
+		var self=this;
 	
 		var interval=setInterval(function(){
 			self.draw();
 		}, 20);
-	*/
+
 	};
 	
 	
