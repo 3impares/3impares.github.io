@@ -54,8 +54,15 @@ function paint(ctx) {
 	
 	//player
 	//ctx.fillStyle = '#0f0';
-	ctx.drawImage(yasuo,player.x,player.y,100,50);
+	
 	//player.fill(ctx);
+	ctx.save()
+
+	ctx.drawImage(yasuo,player.x,player.y,100,50);
+
+	ctx.rotate(120);
+
+	ctx.restore();
 	
 	//score
 	ctx.fillStyle='#000';
