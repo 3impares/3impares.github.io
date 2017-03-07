@@ -209,7 +209,7 @@ function Shuriken(x,y,indice){
 	this.move=function(){
 		
 		if(this.activo){
-		
+
 			if (this.dir == 0)  this.rectangle.y -= 20;
 			if (this.dir == 1)  this.rectangle.x += 20; 
 			if (this.dir == 2)  this.rectangle.y += 20; 
