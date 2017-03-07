@@ -5,12 +5,17 @@ var c = oCanvas.create({
 	fps: 60
 });
 
+var KEY_D=68;
+
 var angle;
+
+var shur=15;
 
 var enemies= new Array();
 
 var MAX_BADS=20;
 
+var shurikens=new Array();
 
 var hattori=c.display.image({
 	x:c.width / 2,
@@ -46,9 +51,19 @@ function init(){
 }
 
 c.setLoop(function () {
+<<<<<<< HEAD
 	enemies[random(MAX_BADS)].x+=10;
 	enemies[random(MAX_BADS)].y+=10;
 	enemies[random(MAX_BADS)].rotation=-random(180);
+=======
+	enemies[random(MAX_BADS)].x+=5;
+	enemies[random(MAX_BADS)].y+=5;
+	enemies[random(MAX_BADS)].rotation=-45;
+	for(var i=0;i<shurikens.length;i++){
+		shurikens[i].move();
+		c.addChild(shurikens[i].image)
+	}
+>>>>>>> origin/master
 
 });
 
@@ -60,6 +75,13 @@ function getMouse(canvas, evt) {
         x: evt.clientX - rect.left,
         y: evt.clientY - rect.top
 	};
+}
+
+function intersects(img1, img2){
+	return (img1.x < img2.x + img2.width &&
+			img1.x + img1.width > img2.x &&
+			img1.y < img2.y + img2.height &&
+			img1.y + img1.height > img2.y);
 }
 
 function trigonometry(x, y){
@@ -77,6 +99,24 @@ function random(max) {
 	return Math.floor(Math.random() * max);
 }
 
+////////////////////////////shuriken/////////////////////////////////
+
+function Shuriken(){
+	this.angle=angle;
+	this.image=c.display.image({
+		x:c.width / 2,
+		y:c.height / 2,
+		width: 15,
+		height: 15,
+		origin: { x: "center", y: "center" },
+		image: "img/shuriken.png"
+	});
+
+	this.move=function(){
+		this.image.x += Math.cos(this.angle)*20;
+		this.image.y += Math.sin(this.angle)*20;
+	}
+}
 
 ////////////////////////////events/////////////////////////////////////////
 
@@ -89,4 +129,13 @@ canvas.addEventListener('mousemove', function(evt) {
         hattori.rotation=angle-90;        
 }, false);
 
+document.addEventListener('keydown', function (evt) {
 
+	if(evt.which==KEY_D){
+		if (shur>0){
+			shur--;
+			var x = hattori.x, y = hattori.y;
+			shurikens.push(new Shuriken(x, y));
+		}
+	}
+});
