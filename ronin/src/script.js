@@ -29,6 +29,7 @@ c.timeline.start();
 //////////////////////////////game/////////////////////////////////////////
 
 function init(){
+	
 	for(var i=0;i<MAX_BADS;i++){
 		enemies[i]=c.display.image({
 				x:random(c.width-100)+50,
@@ -45,9 +46,9 @@ function init(){
 }
 
 c.setLoop(function () {
-	enemies[random(MAX_BADS)].x+=2;
-	enemies[random(MAX_BADS)].y+=2;
-	enemies[random(MAX_BADS)].rotation=random(180);
+	enemies[random(MAX_BADS)].x+=5;
+	enemies[random(MAX_BADS)].y+=5;
+	enemies[random(MAX_BADS)].rotation=-45;
 
 });
 
