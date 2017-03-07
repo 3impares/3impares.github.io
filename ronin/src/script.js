@@ -46,9 +46,9 @@ function init(){
 }
 
 c.setLoop(function () {
-	enemies[random(MAX_BADS)].x+=5;
-	enemies[random(MAX_BADS)].y+=5;
-	enemies[random(MAX_BADS)].rotation=-45;
+	enemies[random(MAX_BADS)].x+=10;
+	enemies[random(MAX_BADS)].y+=10;
+	enemies[random(MAX_BADS)].rotation=-random(180);
 
 });
 
