@@ -51,19 +51,16 @@ function init(){
 }
 
 c.setLoop(function () {
-<<<<<<< HEAD
+
 	enemies[random(MAX_BADS)].x+=10;
 	enemies[random(MAX_BADS)].y+=10;
 	enemies[random(MAX_BADS)].rotation=-random(180);
-=======
-	enemies[random(MAX_BADS)].x+=5;
-	enemies[random(MAX_BADS)].y+=5;
-	enemies[random(MAX_BADS)].rotation=-45;
+
 	for(var i=0;i<shurikens.length;i++){
 		shurikens[i].move();
 		c.addChild(shurikens[i].image)
 	}
->>>>>>> origin/master
+
 
 });
 
