@@ -1,19 +1,27 @@
+var angle;
+var c = oCanvas.create({
+	canvas: "#canvas"
+});
 
-window.addEventListener('load', start, false); 
+var image=c.display.image({
+	x:c.width / 2,
+	y:c.height / 2,
+	width: 100,
+	height: 50,
+	origin: { x: "center", y: "center" },
+	image: "img/yasuo.svg"
+});
 
-var Ronin=Ronin || {};
+c.setLoop(function () {});
 
-var r;
+c.addChild(image);
 
-function start(){
-	r=new Ronin();
-
-	r.init();
-}
+c.timeline.start();
 
 canvas.addEventListener('mousemove', function(evt) {
         var mouse = getMouse(canvas, evt);
-        r.rotate(mouse);
+        var angle=trigonometry(mouse.x, mouse.y);
+        image.rotation=angle-90;        
 }, false);
 
 function getMouse(canvas, evt) {
@@ -24,54 +32,12 @@ function getMouse(canvas, evt) {
 	};
 }
 
-Ronin = function(){
-
-	this.samurai=new HattoriHanzo();
-	this.enemies=new Array();
-	this.s=new Image();
-	this.canvas;
-	this.ctx;
-	this.x;
-	this.y;
-	this.init=function(){
-
-		this.s.src='img/yasuo.svg';
-		this.canvas = document.getElementById('canvas');
-		this.ctx = this.canvas.getContext('2d');
-		this.x=this.canvas.width/2;
-		this.y=this.canvas.height/2;
-		this.ctx.drawImage(this.s, this.canvas.width/2, this.canvas.height/2,100,50);
-		
-	};
-
-	this.trigonometry=function(x, y){
-		return Math.asin(y/Math.sqrt(x*x+y*y));
-	};
-	this.rotate=function(mouse){
-		this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-		this.ctx.save();
-
-		var angle=this.trigonometry(mouse.x, mouse.y);
-		
-		this.ctx.rotate(angle);
-    	
-    	this.ctx.drawImage(this.s, this.x, this.y,100,50);
-
-    	this.ctx.restore();
-
-		console.log(angle+" "+mouse.x+" "+mouse.y);
-	};
+function trigonometry(x, y){
+	var cos=(x-c.width / 2)/(c.width/2);
+	var sin=-(y-c.height / 2)/(c.height/2);
 	
-	
-};
+	angle=-(Math.atan(sin/cos)/(Math.PI/180));
+	if(cos<0)angle+=180;
 
-
-HattoriHanzo = function(){
-	
-	this.draw = function(){
-
-	};
-
-
-};
-
+	return angle;
+}
