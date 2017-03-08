@@ -54,18 +54,12 @@ function init(){
 }
 
 c.setLoop(function () {
-<<<<<<< HEAD
+
 	
 	enemies[random(MAX_BADS)].x += 5*randomAux();
 	enemies[random(MAX_BADS)].y += 5*randomAux();
 	enemies[random(MAX_BADS)].rotation = -45*randomAux();
-=======
 
-	enemies[random(MAX_BADS)].x+=10;
-	enemies[random(MAX_BADS)].y+=10;
-	enemies[random(MAX_BADS)].rotation=-random(180);
-
->>>>>>> origin/master
 	for(var i=0;i<shurikens.length;i++){
 		if(shurikens[i].active){
 			shurikens[i].move();
