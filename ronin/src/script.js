@@ -6,13 +6,22 @@ var c = oCanvas.create({
 });
 var KEY_D=68;
 var angle;
-var shur=1500;
+var shur=15;
 var deads=new Array();
 var enemies= new Array();
-
 var MAX_BADS=20;
-
 var shurikens=new Array();
+var score=0;
+var ctx=null;
+var scoreboard = c.display.text({
+	x: 100,
+	y: 50,
+	origin: { x: "center", y: "center" },
+	font: "bold 30px sans-serif",
+	text: "Score: "+score+"\nShurikens: "+shur,
+	fill: "#000"
+});
+c.addChild(scoreboard);
 
 var hattori=c.display.image({
 	x:c.width / 2,
@@ -54,7 +63,8 @@ function init(){
 }
 
 c.setLoop(function () {
-
+	
+	scoreboard.text = "Score: "+score+"\nShurikens: "+shur;
 	
 	enemies[random(MAX_BADS)].x += 5*randomAux();
 	enemies[random(MAX_BADS)].y += 5*randomAux();
@@ -63,14 +73,38 @@ c.setLoop(function () {
 	for(var i=0;i<shurikens.length;i++){
 		if(shurikens[i].active){
 			shurikens[i].move();
-			
 		}
 	}
-	destroyShuriken();
-
+	
+	for(var j=0; j<enemies.length; j++){
+		for(var k=0;k<shurikens.length; k++){
+			if(intersects(shurikens[k].image, enemies[j])){
+				kill(j);
+				shurikens[k].image.image = null;
+				shurikens[k].active = false;
+			}
+		}
+	}
+	destroyShuriken(); //eliminar shurikens inactivos
+	//setTimeout(function(){deads.splice(deads.length-1,1);}, 100); //eliminar muertos
 
 });
 
+function kill(i){
+	score += 10;
+	shur++;
+	deads.push(c.display.image({
+				x:enemies[i].x,
+				y:enemies[i].y,
+				width: 100,
+				height: 50,
+				origin: { x: "center", y: "center" },
+				image: "img/muerto.png"
+			  }));
+	c.addChild(deads[deads.length-1]);
+	enemies[i].x = random(canvas.width / 50 - 1) * 50;
+	enemies[i].y = random(canvas.height / 50 - 1) * 50;
+}
 
 ////////////////////////////auxiliar/////////////////////////////////
 function getMouse(canvas, evt) {
@@ -151,7 +185,6 @@ canvas.addEventListener('mousemove', function(evt) {
 }, false);
 
 document.addEventListener('keyup', function (evt) {
-
 	if(evt.which==KEY_D){
 		if (shur>0){
 			shur--;
