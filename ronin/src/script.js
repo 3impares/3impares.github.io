@@ -1,9 +1,11 @@
+//console.log(level1[0*100*9]); 
 
 ///////////////////////////////ini///////////////////////////////////////
 var c = oCanvas.create({
 	canvas: "#canvas",
 	fps: 60
 });
+
 var KEY_D=68;
 var angle;
 var shur=15;
@@ -29,7 +31,7 @@ var hattori=c.display.image({
 	width: 100,
 	height: 50,
 	origin: { x: "center", y: "center" },
-	image: "img/yasuo.svg"
+	image: "img/game/yasuo.svg"
 });
 
 
@@ -54,7 +56,7 @@ function init(){
 				width: 100,
 				height: 50,
 				origin: { x: "center", y: "center" },
-				image: "img/enemy.svg"
+				image: "img/game/enemy.svg"
 			  });
 		c.addChild(enemies[i]);
 	}
@@ -87,6 +89,10 @@ c.setLoop(function () {
 	}
 	destroyShuriken(); //eliminar shurikens inactivos
 	//setTimeout(function(){deads.splice(deads.length-1,1);}, 100); //eliminar muertos
+	if(keys['space']){
+		keys['space']=false;
+		throwShuriken();
+	}
 
 });
 
@@ -99,7 +105,7 @@ function kill(i){
 				width: 100,
 				height: 50,
 				origin: { x: "center", y: "center" },
-				image: "img/muerto.png"
+				image: "img/game/muerto.png"
 			  }));
 	c.addChild(deads[deads.length-1]);
 	enemies[i].x = random(canvas.width / 50 - 1) * 50;
@@ -148,7 +154,7 @@ function Shuriken(){
 		width: 15,
 		height: 15,
 		origin: { x: "center", y: "center" },
-		image: "img/shuriken.png"
+		image: "img/game/shuriken.png"
 	});
 	console.log(Math.sin(90*Math.PI/180));
 
@@ -173,6 +179,15 @@ function destroyShuriken(){
 	}
 }
 
+function throwShuriken(){
+	if (shur>0){
+		shur--;
+		var x = hattori.x, y = hattori.y;
+		shurikens.push(new Shuriken(x, y));
+		c.addChild(shurikens[shurikens.length-1].image);
+	}
+}
+
 ////////////////////////////events/////////////////////////////////////////
 
 window.addEventListener('load', init, false); 
@@ -184,13 +199,19 @@ canvas.addEventListener('mousemove', function(evt) {
         hattori.rotation=-angle-90;        
 }, false);
 
-document.addEventListener('keyup', function (evt) {
-	if(evt.which==KEY_D){
-		if (shur>0){
-			shur--;
-			var x = hattori.x, y = hattori.y;
-			shurikens.push(new Shuriken(x, y));
-			c.addChild(shurikens[shurikens.length-1].image);
-		}
-	}
-});
+var KEY_CODES = { 32:'space', 37: 'left', 39: 'right', 38:'up', 40:'down'};
+var keys = {};
+
+window.addEventListener('keydown',function(e) {
+  if(KEY_CODES[e.keyCode]) {
+   keys[KEY_CODES[e.keyCode]] = true;
+   e.preventDefault();
+  }
+},false);
+
+window.addEventListener('keyup',function(e) {
+  if(KEY_CODES[e.keyCode]) {
+   keys[KEY_CODES[e.keyCode]] = false; 
+   e.preventDefault();
+  }
+},false);
