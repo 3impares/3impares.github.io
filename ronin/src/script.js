@@ -66,9 +66,9 @@ c.setLoop(function () {
 	
 	scoreboard.text = "Score: "+score+"\nShurikens: "+shur;
 	
-	enemies[random(MAX_BADS)].x += 5*randomAux();
-	enemies[random(MAX_BADS)].y += 5*randomAux();
-	enemies[random(MAX_BADS)].rotation = -45*randomAux();
+	//enemies[random(MAX_BADS)].x += 5*randomAux();
+	//enemies[random(MAX_BADS)].y += 5*randomAux();
+	//enemies[random(MAX_BADS)].rotation = -45*randomAux();
 
 	for(var i=0;i<shurikens.length;i++){
 		if(shurikens[i].active){
