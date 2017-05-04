@@ -8,33 +8,35 @@ var game = function(){
         .controls().touch();
 
 
-//////////////////////////////////Hattori////////////////////
-Q.Sprite.extend("Hattori", {
-	init: function(){
-		this._super({
-			x:Q.w/2,
-			y:Q.h/2
-		});
+	//////////////////////////////////Hattori////////////////////
+	Q.Sprite.extend("Hattori", {
+		init: function(){
 
-	}
-
-
-});
-
+			this._super({
+				sprite: "yasuo",
+	      		sheet: "yasuo",
+				x:Q.w/2,
+				y:Q.h/2
+			});
+		}
 
 
-
+	});
 
 
 
 
 
 
-////////////////////////////////////Scene//////////////////
 
-Q.load(["yasuo.svg"], function(){
-        Q.compileSheets("yasuo.svg", "yasuo.json");
-});
+
+
+
+	////////////////////////////////////Scene//////////////////
+
+	Q.load(["yasuo.svg"], function(){
+	        Q.compileSheets("yasuo.svg", "yasuo.json");
+	});
 
 
 
