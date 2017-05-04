@@ -1,6 +1,6 @@
 
 //accedemos a las posiciones de la matriz de la siguiente manera:
-//			  level [i*100+j]; //i filas, j columnas
+//			  level [i*w+j]; //i filas, j columnas
 //console.log(level1[98*100+1]); 
 
 ///////////////////////////////ini///////////////////////////////////////
@@ -8,6 +8,7 @@ var c = oCanvas.create({
 	canvas: "#canvas",
 	fps: 60
 });
+
 
 var KEY_D=68;
 var angle;

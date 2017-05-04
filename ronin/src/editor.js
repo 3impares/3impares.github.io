@@ -4,7 +4,6 @@ var width=100;
 var height=100;
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
-
 var KEY_BACK=8;
 
 
