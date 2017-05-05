@@ -425,7 +425,7 @@ Quintus["2D"] = function(Q) {
     }
   });
 
-  Q.gravityY = 9.8*100;
+  Q.gravityY = 0;
   Q.gravityX = 0;
 
   Q.component('2d',{
@@ -436,7 +436,7 @@ Quintus["2D"] = function(Q) {
         vy: 0,
         ax: 0,
         ay: 0,
-        gravity: 1,
+        gravity: 0,
         collisionMask: Q.SPRITE_DEFAULT
       });
       entity.on('step',this,"step");

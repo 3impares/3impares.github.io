@@ -1,3 +1,4 @@
+  
 /*global Quintus:false, module:false */
 
 /**
@@ -778,7 +779,7 @@ Quintus.Input = function(Q) {
    */
   Q.component("platformerControls", {
     defaults: {
-      speed: 200,
+      speed: 400,
       jumpSpeed: -300,
       collisions: []
     },
@@ -835,7 +836,8 @@ Quintus.Input = function(Q) {
           } else {
             p.vx = -p.speed;
           }
-        } else if(Q.inputs['right']) {
+        } 
+		if(Q.inputs['right']) {
           p.direction = 'right';
           if(collision) {
             p.vx = -p.speed * collision.normalY;
@@ -843,7 +845,8 @@ Quintus.Input = function(Q) {
           } else {
             p.vx = p.speed;
           }
-        } else if(Q.inputs['up']) {
+        }
+		if(Q.inputs['up']) {
           p.direction = 'up';
           if(collision) {
             p.vx = -p.speed * collision.normalY;
@@ -851,7 +854,8 @@ Quintus.Input = function(Q) {
           } else {
             p.vy = -p.speed;
           }
-		} else if(Q.inputs['down']) {
+		} 
+		if(Q.inputs['down']) {
           p.direction = 'down';
           if(collision) {
             p.vx = -p.speed * collision.normalY;
@@ -859,7 +863,8 @@ Quintus.Input = function(Q) {
           } else {
             p.vy = p.speed;
           }
-		}else{
+		}
+		if(!Q.inputs['up']&&!Q.inputs['down']&&!Q.inputs['right']&&!Q.inputs['left']){
           p.vx = 0;
 		  p.vy = 0;
         }
