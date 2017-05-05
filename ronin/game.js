@@ -7,8 +7,9 @@ var game = function(){
         // And turn on default input controls and touch input (for UI)
         .controls().touch();
 
-		Q.load(["hattori.png", "hattori.json"], function(){
+		Q.load(["hattori.png", "hattori.json", "cursor.png", "cursor.json"], function(){
 			Q.compileSheets("hattori.png", "hattori.json");
+			Q.compileSheets("cursor.png", "cursor.json");
 		});
 		
 	var mousex, mousey;
@@ -16,7 +17,7 @@ var game = function(){
     	mousex = e.offsetX || e.layerX,
         mousey = e.offsetY || e.layerY;
     });	
-
+	Q.el.style.cursor='none';
 	//////////////////////////////////Hattori////////////////////
 	Q.Sprite.extend("Hattori", {
 		init: function(){
@@ -44,6 +45,30 @@ var game = function(){
 			this.p.angle=-this.trigonometry(mousex, mousey)-90;
 		} 
 		
+
+	});
+	/////////////////////////////cursor////////////////////
+	Q.Sprite.extend("Cursor",{
+		init:function(){
+			this._super({
+				sheet:"cursor"
+			});
+			this.p.sensor=true;
+		},
+		trigonometry: function (x, y){
+			var cos=(x-Q.width / 2)/(Q.width/2);
+			var sin=-(y-Q.height / 2)/(Q.height/2);
+			
+			angle=(Math.atan(sin/cos)/(Math.PI/180));
+			if(cos<0)angle+=180;
+
+			return angle;
+		},
+		step:function(dt){
+			this.p.x=mousex;
+			this.p.y=mousey;
+			this.p.angle=-this.trigonometry(mousex, mousey)-270;
+		}
 
 	});
 
@@ -87,6 +112,7 @@ var game = function(){
 	Q.scene('mapa1', function(stage) {
 		Q.stageTMX("mapa1.tmx", stage);
 		var hattori = stage.insert(new Q.Hattori());
+		var cursor = stage.insert(new Q.Cursor());
 		stage.add("viewport").follow(hattori, {x:true, y:true});
 	});
 	
