@@ -11,6 +11,11 @@ var game = function(){
 			Q.compileSheets("hattori.png", "hattori.json");
 		});
 		
+	var mousex, mousey;
+	Q.el.addEventListener('mousemove',function(e) {
+    	mousex = e.offsetX || e.layerX,
+        mousey = e.offsetY || e.layerY;
+    });	
 
 	//////////////////////////////////Hattori////////////////////
 	Q.Sprite.extend("Hattori", {
@@ -20,16 +25,28 @@ var game = function(){
 				sprite: "hattori anim",
 				x:Q.width/2,
 				y:Q.height/2,
-				gravity: 0
+				gravity: 0,
+				scale:0.5
 			});
 			this.add('2d, animation, platformerControls');
+     	},
+     	trigonometry: function (x, y){
+			var cos=(x-Q.width / 2)/(Q.width/2);
+			var sin=-(y-Q.height / 2)/(Q.height/2);
+			
+			angle=(Math.atan(sin/cos)/(Math.PI/180));
+			if(cos<0)angle+=180;
+
+			return angle;
 		},
-		
 		step: function(dt){
 			this.play("stand");
-		}
+			this.p.angle=-this.trigonometry(mousex, mousey)-90;
+		} 
+		
 
 	});
+
 	Q.animations('hattori anim', {
 		stand: { frames: [0], rate: 1 }
 	});
@@ -37,7 +54,6 @@ var game = function(){
 	
 	Q.loadTMX("mapa1.tmx", function() {
 		Q.stageScene("mainTitle", 0);
-		console.log("edbfiywbdefioubwoeudfewourhfouehrofuheofhoeurbvofubefubeoirbvfiuerbfouwbdovubwoduvbeoub");
 		//Q.debug = true;
 	});
 
@@ -47,8 +63,7 @@ var game = function(){
 			cx: Q.height/2, cy: Q.height/2,  fill: "rgba(0,0,0,1)"
 		}));
 		var button = box.insert(new Q.UI.Button({ x: Q.width/2, y: Q.height/2, fill: "#CCCCCC", asset: "bg.png" })); 
-		console.log(button.p.border);
-		setTimeout(function(stage){Q.stageScene("mapa1"); console.log("settimeout");}, 1000);
+		setTimeout(function(stage){Q.stageScene("mapa1");}, 1000);
 		button.on("click", init);
 		document.addEventListener("keyup", listener);
 		
@@ -61,7 +76,6 @@ var game = function(){
 	var init = function(){
 		document.removeEventListener("keyup", listener);
 		document.removeEventListener("touchend", init);
-		console.log("en el init")
 		Q.stageScene('mapa1');
 		
 	};
@@ -73,7 +87,6 @@ var game = function(){
 	Q.scene('mapa1', function(stage) {
 		Q.stageTMX("mapa1.tmx", stage);
 		var hattori = stage.insert(new Q.Hattori());
-		console.log(hattori.p.x);
 		stage.add("viewport").follow(hattori, {x:true, y:true});
 	});
 	
