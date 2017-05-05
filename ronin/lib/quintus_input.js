@@ -837,17 +837,31 @@ Quintus.Input = function(Q) {
           }
         } else if(Q.inputs['right']) {
           p.direction = 'right';
-          if(collision && p.landed > 0) {
+          if(collision) {
             p.vx = -p.speed * collision.normalY;
             p.vy = p.speed * collision.normalX;
           } else {
             p.vx = p.speed;
           }
-        } else {
-          p.vx = 0;
-          if(collision && p.landed > 0) {
-            p.vy = 0;
+        } else if(Q.inputs['up']) {
+          p.direction = 'up';
+          if(collision) {
+            p.vx = -p.speed * collision.normalY;
+            p.vy = p.speed * collision.normalX;
+          } else {
+            p.vy = -p.speed;
           }
+		} else if(Q.inputs['down']) {
+          p.direction = 'down';
+          if(collision) {
+            p.vx = -p.speed * collision.normalY;
+            p.vy = p.speed * collision.normalX;
+          } else {
+            p.vy = p.speed;
+          }
+		}else{
+          p.vx = 0;
+		  p.vy = 0;
         }
 
         if(p.landed > 0 && (Q.inputs['up'] || Q.inputs['action']) && !p.jumping) {
