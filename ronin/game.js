@@ -1,3 +1,11 @@
+//////////////////////////////////////////////////////////
+/*
+NOTAS: quintus_inputs no hay else para volver la vy a 0 cuando dejas de pulsar solo una de las teclas.
+
+
+*/
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 ////////////////////////////////ini///////////////////////////
 var game = function(){
 	var Q = window.Q = Quintus({ audioSupported: [ 'ogg', 'mp3' ]})
@@ -11,10 +19,17 @@ var game = function(){
 			Q.compileSheets("hattori.png", "hattori.json");
 			Q.compileSheets("cursor.png", "cursor.json");
 		});
+		
+	var originX = Q.width/2;
+	var originY = Q.height/2;
+	var canvas = document.getElementById('quintus'); 
+	
 	var mousex, mousey;
 	Q.el.addEventListener('mousemove',function(e) {
-    	mousex = e.offsetX || e.layerX,
-        mousey = e.offsetY || e.layerY;
+		var rect = canvas.getBoundingClientRect();
+		
+    	mousex = e.offsetX || e.layerX - rect.left,
+        mousey = e.offsetY || e.layerY - rect.top;
     });	
 	Q.el.style.cursor='none';
 
@@ -64,7 +79,9 @@ var game = function(){
 		},
 		step: function(dt){
 			this.play("stand");
-			this.p.angle=-this.trigonometry(mousex, mousey)-90;
+			this.p.angle = -this.trigonometry(mousex, mousey)-90;
+			originX = this.p.x;
+			originY = this.p.y;
 		}
 
 	});
@@ -81,7 +98,8 @@ var game = function(){
 				asset:"shuriken.png",
 				vy:500,
 				vx:-500,
-				scale:0.2			});
+				scale:0.2			
+			});
 			
 			this.add('2d, animation, tween');
 			this.on("hit",this,"hit");
@@ -98,15 +116,18 @@ var game = function(){
 
 	/////////////////////////////cursor////////////////////
 	Q.Sprite.extend("Cursor",{
-		init:function(){
-			this._super({
-				sheet:"cursor"
+		init:function(p){
+			this._super(p, {
+				sheet:"cursor",
+				x: mousex,
+				y: mousey
 			});
 			this.p.sensor=true;
+			//this.add("2d, platformerControls");
 		},
 		trigonometry: function (x, y){
-			var cos=(x-Q.width / 2)/(Q.width/2);
-			var sin=-(y-Q.height / 2)/(Q.height/2);
+			var cos=(x-originX)/(originX);
+			var sin=-(y-originY)/(originY);
 			
 			angle=(Math.atan(sin/cos)/(Math.PI/180));
 			if(cos<0)angle+=180;
