@@ -22,7 +22,8 @@ var game = function(){
 		
 	var originX = Q.width/2;
 	var originY = Q.height/2;
-	var canvas = document.getElementById('quintus'); 
+	var canvas = document.getElementById('quintus');
+	var center;
 	
 	var mousex, mousey;
 	
@@ -31,9 +32,17 @@ var game = function(){
 		
     	mousex = e.offsetX || e.layerX - rect.left,
         mousey = e.offsetY || e.layerY - rect.top;
-    });	
+    });
+	
+	function getMouse(evt) {
+		var rect = canvas.getBoundingClientRect();
+		return {
+			x: evt.offsetX || evt.layerX,
+			y: evt.offsetY || evt.layerY
+		};
+	};
 
-	Q.el.style.cursor='none';
+	//Q.el.style.cursor='none';
 
 	//////////////////////////////////Hattori////////////////////
 	Q.Sprite.extend("Hattori", {
@@ -41,29 +50,27 @@ var game = function(){
 			this._super({
 				sheet: "hattori",
 				sprite: "hattori anim",
-				x:Q.width/2,
-				y:Q.height/2,
+				x:500,
+				y:500,
 				scale:0.5,
 				coldown:false
 			});
 			this.add('2d, animation, platformerControls');
 			var self=this;
 			//---------------THROW SHURIKEN--------------
-			document.addEventListener("keydown", function (evt) {
-				if(evt.which==67){ //C
-					self.fire();
-				}	
+			document.addEventListener("click", function (evt) {
+				self.fire(evt);
 			});
 		  },
 		  
-		  fire: function(){
+		  fire: function(evt){
 			if(!this.p.coldown){
-				
+				var mouse = getMouse(evt);
 				this.p.coldown = true;
-				var dx = -this.p.w*this.p.scale-1;
+				/*var dx = -this.p.w*this.p.scale-1;
 				var velx = -100;
-				//if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}
-				var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x+dx, y: this.p.y}));
+				if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}*/
+				var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, objX: mouse.x, objY: mouse.y}));
 				var self = this;
 				console.log("Hattori "+this.p.x+" "+this.p.y);
 				setTimeout(function(){self.p.coldown=false;}, 1000);
@@ -100,18 +107,34 @@ var game = function(){
 				asset:"shuriken.png",
 				vy:500,
 				vx:-500,
-				scale:0.2			
+				sensor: true,
+				objX: 0,
+				objY: 0,
+				scale:0.2		
 			});
 			
 			this.add('2d, animation, tween');
 			this.on("hit",this,"hit");
 			console.log("shuriken "+this.p.x+" "+this.p.y);
-		},
-		hit:function(){
-			this.destroy();
+			this.getFinal();
 		},
 		
-		step:function(dt){}
+		getFinal: function(){
+			this.animate({x: this.p.objX, y: this.p.objY}, 1)
+		},
+		
+		hit: function(collision){
+			if(!collision.obj.isA("Hattori")){
+				/*if(collision.obj.isA("Enemy")){
+					collision.obj.death();
+				}*/
+				this.destroy();
+			}
+		},
+		
+		step:function(dt){
+			//this.animate({angle: 45});
+		}
 	});
 	
 	
@@ -125,7 +148,6 @@ var game = function(){
 				y: mousey
 			});
 			this.p.sensor=true;
-			//this.add("2d, platformerControls");
 		},
 		trigonometry: function (x, y){
 			var cos=(x-originX)/(originX);
@@ -137,9 +159,10 @@ var game = function(){
 			return angle;
 		},
 		step:function(dt){
-			this.p.x=mousex;
-			this.p.y=mousey;
+			this.p.x=mousex+center.x;
+			this.p.y=mousey+center.y;
 			this.p.angle=-this.trigonometry(mousex, mousey)-270;
+			
 		}
 
 	});
@@ -155,10 +178,11 @@ var game = function(){
 		// Create a new scene called level 1
 	Q.scene('mapa1', function(stage) {
 		Q.stageTMX("mapa1.tmx", stage);
+		center = stage.add("viewport");
 		console.log("hola");
 		var hattori = stage.insert(new Q.Hattori());
 		var cursor = stage.insert(new Q.Cursor());
-		stage.add("viewport").follow(hattori, {x:true, y:true});
+		center.follow(hattori, {x:true, y:true});
 	});
 	
 
