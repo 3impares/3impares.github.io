@@ -864,8 +864,14 @@ Quintus.Input = function(Q) {
             p.vy = p.speed;
           }
 		}
+<<<<<<< HEAD
+		if(!Q.inputs['up']&&!Q.inputs['down']&&!Q.inputs['right']&&!Q.inputs['left']){
+          p.vx = 0;
+		      p.vy = 0;
+=======
 		if(!Q.inputs['up']&&!Q.inputs['down']){
 		  p.vy = 0;
+>>>>>>> 8b8192e03cd5a8a4eb5552640d9ce48be55173aa
         }
 		if(!Q.inputs['right']&&!Q.inputs['left']){
 		  p.vx = 0;
