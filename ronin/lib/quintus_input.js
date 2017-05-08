@@ -866,7 +866,7 @@ Quintus.Input = function(Q) {
 		}
 		if(!Q.inputs['up']&&!Q.inputs['down']&&!Q.inputs['right']&&!Q.inputs['left']){
           p.vx = 0;
-		  p.vy = 0;
+		      p.vy = 0;
         }
 
         if(p.landed > 0 && (Q.inputs['up'] || Q.inputs['action']) && !p.jumping) {
