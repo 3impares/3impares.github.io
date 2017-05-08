@@ -234,7 +234,7 @@ var game = function(){
 		var hattori = stage.insert(new Q.Hattori());
 		//var cursor = stage.insert(new Q.Cursor());
 		var enemies=[];
-		for(var i=0; i<10; i++){
+		for(var i=0; i<46; i++){
 			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100}));
 		}
 		center.follow(hattori, {x:true, y:true});
