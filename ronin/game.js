@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 /*
-NOTAS: quintus_inputs no hay else para volver la vy a 0 cuando dejas de pulsar solo una de las teclas.
+NOTAS: 
 
 
 */
@@ -25,12 +25,14 @@ var game = function(){
 	var canvas = document.getElementById('quintus'); 
 	
 	var mousex, mousey;
+	
 	Q.el.addEventListener('mousemove',function(e) {
 		var rect = canvas.getBoundingClientRect();
 		
     	mousex = e.offsetX || e.layerX - rect.left,
         mousey = e.offsetY || e.layerY - rect.top;
     });	
+
 	Q.el.style.cursor='none';
 
 	//////////////////////////////////Hattori////////////////////
