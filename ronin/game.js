@@ -153,23 +153,6 @@ var game = function(){
 		stand: { frames: [0], rate: 1 }
 	});
 
-	Q.Sprite.extend("Vision", {
-		init:function(p){
-			this._super(p,{
-				shape:'polygon',
-		        color: 'red',
-		        points: [[ 0,0 ], [0,-5], [5,-10], [8, -11], [40, -11], 
-		                  [ 40, 11], [8, 11], [5, 10], [0, 5] ],
-		        x: 500,
-		        y: 600
-			});
-
-		},
-		step:function(){
-
-		}
-	});
-
 	//--------------------SHURIKEN---------------
 	
 	Q.Sprite.extend("Shuriken",{
@@ -252,7 +235,13 @@ var game = function(){
 		center = stage.add("viewport");
 		var hattori = stage.insert(new Q.Hattori());
 		//var cursor = stage.insert(new Q.Cursor());
-		var v=stage.insert(new Q.Vision());
+		var sprite2 = new Q.Sprite({ x: 500, y: 600, w: 300, h: 200 });
+	    sprite2.draw= function(ctx) {
+	      ctx.fillStyle = '#FF0000';
+	      ctx.fillRect(-this.p.cx,-this.p.cy,this.p.w,this.p.h);
+	    };
+
+		
 		
 		var enemies=[];
 		for(var i=0; i<46; i++){
@@ -260,8 +249,5 @@ var game = function(){
 		}
 		center.follow(hattori, {x:true, y:true});
 	});
-	
-
-
 
 }
