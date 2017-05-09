@@ -57,7 +57,7 @@ var game = function(){
 				coldown:false
 			});
 			this.add('2d, animation, platformerControls');
-			console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");
+			//console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");
 			var self=this;
 			//---------------THROW SHURIKEN--------------
 			document.addEventListener("click", function (evt) {
@@ -66,16 +66,16 @@ var game = function(){
 		  },
 		  
 		  fire: function(evt){
-		  	console.log("vengadores reunios!");
+		  	//console.log("vengadores reunios!");
 			if(!this.p.coldown){
 				var mouse = getMouse(evt);
 				this.p.coldown = true;
 				/*var dx = -this.p.w*this.p.scale-1;
 				var velx = -100;
 				if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}*/
-				var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, objX: mouse.x, objY: mouse.y}));
+				var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir}));
 				var self = this;
-				console.log("Hattori "+this.p.x+" "+this.p.y);
+				//console.log("Hattori "+this.p.x+" "+this.p.y);
 				setTimeout(function(){self.p.coldown=false;}, 100);
 			}
 		  },
@@ -90,9 +90,11 @@ var game = function(){
 			return angle;
 		},
 		step: function(dt){
-			//console.log(this.p.x+" "+this.p.y);
+			////console.log(this.p.x+" "+this.p.y);
 			this.play("stand");
-			this.p.angle = -this.trigonometry(mousex, mousey)-90;
+			this.p.dir = this.trigonometry(mousex, mousey);
+			this.p.angle=-this.p.dir-90;
+			//this.c.angle = -this.trigonometry(mousex, mousey)-90;
 			originX = this.p.x;
 			originY = this.p.y;
 		}
@@ -117,11 +119,11 @@ var game = function(){
 				htt:0
 			});
 			this.add('2d, animation, aiBounce, tween');
-			console.log("mi nombre es iñigo montoya, tu mataste a mi padre, preparate a morir");
+			//console.log("mi nombre es iñigo montoya, tu mataste a mi padre, preparate a morir");
 			this.on("bump.top",function(collision) { this.p.vy=100;});
 		 	this.on("bump.bottom",function(collision) {	this.p.vy=-100;});
 		 	var self=this;
-			document.addEventListener("click", function (evt) {
+			document.addEventListener("dblclick", function (evt) {
 				self.fire(evt);
 			});
 		},
@@ -158,19 +160,23 @@ var game = function(){
 	Q.Sprite.extend("Shuriken",{
 		init:function(p){
 			this._super(p,{
+				dir:0,
 				asset:"shuriken.png",
-				vy:500,
-				vx:-500,
+				vy:0,
+				vx:0,
 				sensor: true,
-				objX: 0,
-				objY: 0,
-				scale:0.2		
+				scale:0.2
+				
 			});
+			this.p.vy=-500*Math.sin(this.p.dir*(Math.PI/180));
+			this.p.vx=500*Math.cos(this.p.dir*(Math.PI/180));
+			this.p.y+=-30*Math.sin(this.p.dir*(Math.PI/180));
+			this.p.x+=30*Math.cos(this.p.dir*(Math.PI/180));
 			
 			this.add('2d, animation, tween');
 			this.on("hit",this,"hit");
-			console.log("shuriken "+this.p.x+" "+this.p.y);
-			this.getFinal();
+			console.log("shuriken "+this.p.dir+" vx: "+this.p.vx+" vy: "+this.p.vy);
+			//this.getFinal();
 		},
 		
 		getFinal: function(){
@@ -187,6 +193,7 @@ var game = function(){
 		},
 		
 		step:function(dt){
+			
 			//this.animate({angle: 45});
 		}
 	});
