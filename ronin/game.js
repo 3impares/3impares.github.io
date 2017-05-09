@@ -66,6 +66,7 @@ var game = function(){
 		  },
 		  
 		  fire: function(evt){
+		  	console.log("vengadores reunios!");
 			if(!this.p.coldown){
 				var mouse = getMouse(evt);
 				this.p.coldown = true;
