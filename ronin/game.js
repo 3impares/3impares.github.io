@@ -57,6 +57,7 @@ var game = function(){
 				coldown:false
 			});
 			this.add('2d, animation, platformerControls');
+			console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");
 			var self=this;
 			//---------------THROW SHURIKEN--------------
 			document.addEventListener("click", function (evt) {
@@ -115,7 +116,6 @@ var game = function(){
 				htt:0
 			});
 			this.add('2d, animation, aiBounce, tween');
-			console.log(this.hattori);
 			console.log("mi nombre es iñigo montoya, tu mataste a mi padre, preparate a morir");
 			this.on("bump.top",function(collision) { this.p.vy=100;});
 		 	this.on("bump.bottom",function(collision) {	this.p.vy=-100;});
@@ -140,8 +140,8 @@ var game = function(){
 			this.play("stand");
 			if(this.state==1){
 				this.p.angle = -this.trigonometry(this.p.htt.p.x, this.p.htt.p.y)-90;
-				this.p.vx=this.p.htt.p.x-this.p.x;
-				this.p.vy=this.p.htt.p.y-this.p.y;
+				this.p.vx=(this.p.htt.p.x-this.p.x)*2;
+				this.p.vy=(this.p.htt.p.y-this.p.y)*2;
 			}
 			
 		}
@@ -151,6 +151,24 @@ var game = function(){
 	Q.animations('enemy anim', {
 		stand: { frames: [0], rate: 1 }
 	});
+
+	Q.Sprite.extend("Vision", {
+		init:function(p){
+			this._super(p,{
+				shape:'polygon',
+		        color: 'red',
+		        points: [[ 0,0 ], [0,-5], [5,-10], [8, -11], [40, -11], 
+		                  [ 40, 11], [8, 11], [5, 10], [0, 5] ],
+		        x: 500,
+		        y: 600
+			});
+
+		},
+		step:function(){
+
+		}
+	});
+
 	//--------------------SHURIKEN---------------
 	
 	Q.Sprite.extend("Shuriken",{
@@ -233,6 +251,8 @@ var game = function(){
 		center = stage.add("viewport");
 		var hattori = stage.insert(new Q.Hattori());
 		//var cursor = stage.insert(new Q.Cursor());
+		var v=stage.insert(new Q.Vision());
+		
 		var enemies=[];
 		for(var i=0; i<46; i++){
 			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100}));
