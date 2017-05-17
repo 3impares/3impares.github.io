@@ -168,8 +168,8 @@ var game = function(){
 				scale:0.2
 				
 			});
-			this.p.vy=-500*Math.sin(this.p.dir*(Math.PI/180));
-			this.p.vx=500*Math.cos(this.p.dir*(Math.PI/180));
+			this.p.vy=-Q.height*Math.sin(this.p.dir*(Math.PI/180));
+			this.p.vx=Q.width*Math.cos(this.p.dir*(Math.PI/180));
 			this.p.y+=-30*Math.sin(this.p.dir*(Math.PI/180));
 			this.p.x+=30*Math.cos(this.p.dir*(Math.PI/180));
 			
@@ -185,9 +185,9 @@ var game = function(){
 		
 		hit: function(collision){
 			if(!collision.obj.isA("Hattori")){
-				/*if(collision.obj.isA("Enemy")){
-					collision.obj.death();
-				}*/
+				if(collision.obj.isA("Enemy")){
+					collision.obj.destroy();
+				}
 				this.destroy();
 			}
 		},
@@ -231,7 +231,7 @@ var game = function(){
 	
 	Q.loadTMX("mapa1.tmx",function() {
 		Q.stageScene("mapa1");
-		Q.debug = true;
+		//Q.debug = true;
 	});
 
 
