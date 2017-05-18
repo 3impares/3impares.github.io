@@ -15,7 +15,7 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-		Q.load(["hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
+		Q.load(["cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
 			Q.compileSheets("hattori.png", "hattori.json");
 			Q.compileSheets("cursor.png", "cursor.json");
 			Q.compileSheets("enemy.png", "enemy.json");
@@ -116,12 +116,15 @@ var game = function(){
 				coldown:false,
 				vy:100,
 				state:0,
-				htt:0
+				htt:0,
+				cono: 0
 			});
 			this.add('2d, animation, aiBounce, tween');
 			//console.log("mi nombre es iñigo montoya, tu mataste a mi padre, preparate a morir");
 			this.on("bump.top",function(collision) { this.p.vy=100;});
 		 	this.on("bump.bottom",function(collision) {	this.p.vy=-100;});
+		 	
+			
 		 	var self=this;
 			document.addEventListener("dblclick", function (evt) {
 				self.fire(evt);
@@ -146,6 +149,9 @@ var game = function(){
 				this.p.vx=(this.p.htt.p.x-this.p.x)*2;
 				this.p.vy=(this.p.htt.p.y-this.p.y)*2;
 			}
+			this.p.cono.p.x=this.p.x;
+			this.p.cono.p.y=this.p.y+45;
+			this.p.cono.p.angle=this.p.angle;
 			
 		}
 
@@ -228,7 +234,25 @@ var game = function(){
 
 	});
 	
+	Q.Sprite.extend("Cono",{
+		init:function(p){
+			this._super(p, {
+				asset:"cono.png",
+				x: 500,
+				y: 800
+			});
+			this.add('2d');
+			this.p.sensor=true;
+		},
+		step:function(dt){
+			
+		}
+
+	});
 	
+
+
+
 	Q.loadTMX("mapa1.tmx",function() {
 		Q.stageScene("mapa1");
 		//Q.debug = true;
@@ -241,18 +265,12 @@ var game = function(){
 		Q.stageTMX("mapa1.tmx", stage);
 		center = stage.add("viewport");
 		var hattori = stage.insert(new Q.Hattori());
-		//var cursor = stage.insert(new Q.Cursor());
-		var sprite2 = new Q.Sprite({ x: 500, y: 600, w: 300, h: 200 });
-	    sprite2.draw= function(ctx) {
-	      ctx.fillStyle = '#FF0000';
-	      ctx.fillRect(-this.p.cx,-this.p.cy,this.p.w,this.p.h);
-	    };
-
-		
 		
 		var enemies=[];
 		for(var i=0; i<46; i++){
-			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100}));
+			var cn=stage.insert(new Q.Cono({x:(i+10)*100, y:600}));
+			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100, cono: cn}));
+
 		}
 		center.follow(hattori, {x:true, y:true});
 	});
