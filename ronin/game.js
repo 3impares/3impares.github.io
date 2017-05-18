@@ -2,12 +2,15 @@
 /*
 NOTAS: 
 
+http://gaia.fdi.ucm.es/files/people/pedro/slides/dvi/04canvas.html
 
 */
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 ////////////////////////////////ini///////////////////////////
 var game = function(){
+
+
 	var Q = window.Q = Quintus({ audioSupported: [ 'ogg', 'mp3' ]})
 		 .include("Sprites, Scenes, Input, 2D, TMX, Anim, Touch, UI, Audio")
 		 // Maximize this game to whatever the size of the browser is
@@ -20,6 +23,17 @@ var game = function(){
 			Q.compileSheets("cursor.png", "cursor.json");
 			Q.compileSheets("enemy.png", "enemy.json");
 		});
+		
+		Q.imageData = function(img) {
+		  var canvas = $("<canvas>").attr({ 
+		                       width: img.width, 
+		                       height: img.height })[0];
+		  
+		  var ctx = canvas.getContext("2d");
+		  ctx.drawImage(img,0,0);
+
+		  return ctx.getImageData(0,0,img.width,img.height);
+		}
 		
 	var originX = Q.width/2;
 	var originY = Q.height/2;
@@ -149,8 +163,8 @@ var game = function(){
 				this.p.vx=(this.p.htt.p.x-this.p.x)*2;
 				this.p.vy=(this.p.htt.p.y-this.p.y)*2;
 			}
-			this.p.cono.p.x=this.p.x;
-			this.p.cono.p.y=this.p.y+45;
+			this.p.cono.p.x=(this.p.x+45)*Math.cos(this.p.angle);
+			this.p.cono.p.y=(this.p.y+45)*Math.sin(this.p.angle);
 			this.p.cono.p.angle=this.p.angle;
 			
 		}
@@ -245,9 +259,60 @@ var game = function(){
 			this.p.sensor=true;
 		},
 		step:function(dt){
-			
-		}
+		/*	var col;
+			if(col = this.checkCollision()) {
+			  if(col == 1 && Math.abs(p.vy) < 30) { 
+			    if(p.vy > 0) {
+			      p.vy = 0; 
+			    }
+			  } else {
+			    this.dead=true;
+				}
+			}
+    	*/
+		},
+		checkCollision: function() {
+/*	          var bgData = Q.backgroundPixels;
 
+	          // Get a integer based position from our
+	          // x and y values
+	          var bgx = Math.floor(this.p.x);
+	          var bgy = Math.floor(this.p.y);
+
+	          // Calculate the initial offset into our background
+	          var bgOffset = bgx * 4 + bgy * bgData.width * 4 + 3;
+
+	          // Pull out our data easy access
+	          var pixels = this.imageData.data;
+	          var bgPixels = bgData.data;
+
+	          for(var sy=0;sy < this.imageData.height;sy++) {
+	            for(var sx=0;sx < this.imageData.width;sx++) {
+	              // Check for an existing pixel on our ship
+	              if(pixels[sx*4 + sy * this.imageData.width * 4 + 3]) {
+
+	                // Then check for a matching existing pixel 
+	                // on the background starting from our bgOffest 
+	                // and then indexing in from there
+	                if(bgPixels[bgOffset + sx*4 + sy * bgData.width * 4]) {
+
+	                  // Next check if we are at the bottom of the lander
+	                  // if so return 1, to indicate that we might be landing
+	                  // instead of crashing
+	                  if(sy > this.imageData.height - 2) {
+	                    return 1;
+	                    } else {
+	                    // Otherwise return 2 and...Boom!
+	                    return 2;
+	                  }
+	                }
+	              }
+	            }
+	          }
+	          return 0;
+	      }
+*/
+		}
 	});
 	
 
