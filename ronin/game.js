@@ -138,7 +138,6 @@ var game = function(){
 			this.on("bump.top",function(collision) { this.p.vy=100;});
 		 	this.on("bump.bottom",function(collision) {	this.p.vy=-100;});
 		 	
-		
 		 	var self=this;
 			document.addEventListener("dblclick", function (evt) {
 				self.fire(evt);
@@ -162,6 +161,11 @@ var game = function(){
 		},
 		step: function(dt){
 			this.play("stand");
+			
+			if(this.p.cono.p.alert){
+				this.state = 1;
+			}
+			
 			if(this.state==1){
 				this.p.angle = -this.trigonometry(this.p.htt.p.x, this.p.htt.p.y)-90;
 				this.p.vx=(this.p.htt.p.x-this.p.x)*2;
@@ -171,7 +175,8 @@ var game = function(){
 			
 			this.p.cono.p.x=(this.p.x);//*Math.cos(this.p.angle*(Math.PI/180));
 			this.p.cono.p.y=(this.p.y);//*Math.sin(this.p.angle*(Math.PI/180));
-			}
+			
+		}
 
 	});
 
@@ -199,7 +204,6 @@ var game = function(){
 			
 			this.add('2d, animation, tween');
 			this.on("hit",this,"hit");
-			console.log("shuriken "+this.p.dir+" vx: "+this.p.vx+" vy: "+this.p.vy);
 			//this.getFinal();
 		},
 		
@@ -209,6 +213,7 @@ var game = function(){
 		
 		hit: function(collision){
 			if(!collision.obj.isA("Hattori")){
+				
 				if(collision.obj.isA("Enemy")){
 					collision.obj.die();
 				}
@@ -252,17 +257,28 @@ var game = function(){
 
 	});
 	
+	/////////////////////////////---CONO---////////////////////
 	Q.Sprite.extend("Cono",{
 		init:function(p){
 			this._super(p, {
 				asset:"cono.png",
 				x: 500,
 				y: 800,
-				opacity: 0.5
+				opacity: 0.5,
+				alert: false
 			});
 			this.p.cy=0;
 			this.p.sensor=true;
+			this.on("hit", this, "hit");
 		},
+		
+		hit: function(collision){
+			if(collision.obj.isA("Hattori")){
+				this.p.alert = true;
+				this.destroy();
+			}
+		},
+		
 		step:function(dt){
 		/*	var col;
 			if(col = this.checkCollision()) {
