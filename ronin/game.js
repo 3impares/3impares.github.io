@@ -163,10 +163,12 @@ var game = function(){
 				this.p.vx=(this.p.htt.p.x-this.p.x)*2;
 				this.p.vy=(this.p.htt.p.y-this.p.y)*2;
 			}
-			this.p.cono.p.x=(this.p.x+45)*Math.cos(this.p.angle);
-			this.p.cono.p.y=(this.p.y+45)*Math.sin(this.p.angle);
+
+			console.log("enemy "+this.p.x+" "+this.p.y);
+			this.p.cono.p.x=(this.p.x)*Math.cos(this.p.angle*(Math.PI/180));
+			this.p.cono.p.y=(this.p.y)*Math.sin(this.p.angle*(Math.PI/180));
 			this.p.cono.p.angle=this.p.angle;
-			
+			console.log("cono "+this.p.cono.p.x+" "+this.p.cono.p.y);
 		}
 
 	});
@@ -331,12 +333,16 @@ var game = function(){
 		center = stage.add("viewport");
 		var hattori = stage.insert(new Q.Hattori());
 		
-		var enemies=[];
+		/*var enemies=[];
 		for(var i=0; i<46; i++){
 			var cn=stage.insert(new Q.Cono({x:(i+10)*100, y:600}));
 			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100, cono: cn}));
 
-		}
+		}*/
+		var cn=stage.insert(new Q.Cono({ y:600}));
+		var enemy=stage.insert(new Q.Enemy({htt:hattori, cono: cn}));
+
+
 		center.follow(hattori, {x:true, y:true});
 	});
 
