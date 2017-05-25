@@ -138,11 +138,15 @@ var game = function(){
 			this.on("bump.top",function(collision) { this.p.vy=100;});
 		 	this.on("bump.bottom",function(collision) {	this.p.vy=-100;});
 		 	
-			
+		
 		 	var self=this;
 			document.addEventListener("dblclick", function (evt) {
 				self.fire(evt);
 			});
+		},
+		die: function(){
+			this.p.cono.destroy();
+			this.destroy();
 		},
 		fire: function(evt){
 			this.state=!this.state;
@@ -163,13 +167,11 @@ var game = function(){
 				this.p.vx=(this.p.htt.p.x-this.p.x)*2;
 				this.p.vy=(this.p.htt.p.y-this.p.y)*2;
 			}
-
-			console.log("enemy "+this.p.x+" "+this.p.y);
-			this.p.cono.p.x=(this.p.x)*Math.cos(this.p.angle*(Math.PI/180));
-			this.p.cono.p.y=(this.p.y)*Math.sin(this.p.angle*(Math.PI/180));
 			this.p.cono.p.angle=this.p.angle;
-			console.log("cono "+this.p.cono.p.x+" "+this.p.cono.p.y);
-		}
+			
+			this.p.cono.p.x=(this.p.x);//*Math.cos(this.p.angle*(Math.PI/180));
+			this.p.cono.p.y=(this.p.y);//*Math.sin(this.p.angle*(Math.PI/180));
+			}
 
 	});
 
@@ -208,7 +210,7 @@ var game = function(){
 		hit: function(collision){
 			if(!collision.obj.isA("Hattori")){
 				if(collision.obj.isA("Enemy")){
-					collision.obj.destroy();
+					collision.obj.die();
 				}
 				this.destroy();
 			}
@@ -230,7 +232,7 @@ var game = function(){
 				x: mousex,
 				y: mousey
 			});
-			this.p.sensor=true;
+			//this.p.sensor=true;
 		},
 		trigonometry: function (x, y){
 			var cos=(x-originX)/(originX);
@@ -255,9 +257,10 @@ var game = function(){
 			this._super(p, {
 				asset:"cono.png",
 				x: 500,
-				y: 800
+				y: 800,
+				opacity: 0.5
 			});
-			this.add('2d');
+			this.p.cy=0;
 			this.p.sensor=true;
 		},
 		step:function(dt){
@@ -340,7 +343,7 @@ var game = function(){
 
 		}*/
 		var cn=stage.insert(new Q.Cono({ y:600}));
-		var enemy=stage.insert(new Q.Enemy({htt:hattori, cono: cn}));
+		var enemy=stage.insert(new Q.Enemy({htt:hattori, cono:cn}));
 
 
 		center.follow(hattori, {x:true, y:true});
