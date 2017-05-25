@@ -61,15 +61,16 @@ Quintus.Input = function(Q) {
   };
 
   var DEFAULT_KEYS = {
-    LEFT: 'left', RIGHT: 'right',
-    UP: 'up',     DOWN: 'down',
+    LEFT: 'left', 	A: 'left',
+	RIGHT: 'right',	D: 'right',
+    UP: 'up',     	W: 'up',
+	DOWN: 'down',	S: 'down',
     SPACE: 'fire',
     Z: 'fire',
     X: 'action',
     ENTER: 'confirm',
     ESC: 'esc',
-    P: 'P',
-    S: 'S'
+    P: 'P'
   };
 
   var DEFAULT_TOUCH_CONTROLS  = [ ['left','<' ],
