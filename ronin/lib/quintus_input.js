@@ -65,6 +65,8 @@ Quintus.Input = function(Q) {
 	RIGHT: 'right',	D: 'right',
     UP: 'up',     	W: 'up',
 	DOWN: 'down',	S: 'down',
+	Q: 'shurikenAttack',
+	E: 'swordAttack',
     SPACE: 'fire',
     Z: 'fire',
     X: 'action',
@@ -198,6 +200,7 @@ Quintus.Input = function(Q) {
         }
         e.preventDefault();
       },false);
+	  
 
       if(Q.options.autoFocus) {  Q.el.focus(); }
       this.keyboardEnabled = true;
@@ -792,6 +795,8 @@ Quintus.Input = function(Q) {
 
       this.entity.on("step",this,"step");
       this.entity.on("bump.bottom",this,"landed");
+	  var self = this.entity;
+	  Q.el.addEventListener("click", function(){self.trigger('clickEvent', self);}, true);
 
       p.landed = 0;
       p.direction ='right';
@@ -834,15 +839,21 @@ Quintus.Input = function(Q) {
           if(collision && p.landed > 0) {
             p.vx = p.speed * collision.normalY;
             p.vy = -p.speed * collision.normalX;
-          } else {
-            p.vx = -p.speed;
-          }
+          } else if(p.vy!=0){
+            p.vx = -p.speed*(Math.cos(Math.PI/4));
+			p.vy *=  Math.sin(Math.PI/4);
+          }else{
+			p.vx = -p.speed;
+		  }
         } 
 		if(Q.inputs['right']) {
           p.direction = 'right';
           if(collision) {
             p.vx = -p.speed * collision.normalY;
             p.vy = p.speed * collision.normalX;
+          } else if(p.vy!=0){
+            p.vx = p.speed*(Math.cos(Math.PI/4));
+			p.vy *=  Math.sin(Math.PI/4);
           } else {
             p.vx = p.speed;
           }
@@ -852,6 +863,9 @@ Quintus.Input = function(Q) {
           if(collision) {
             p.vx = -p.speed * collision.normalY;
             p.vy = p.speed * collision.normalX;
+          } else if(p.vx!=0){
+            p.vy = -p.speed*(Math.sin(Math.PI/4));
+			p.vx *=  Math.cos(Math.PI/4);
           } else {
             p.vy = -p.speed;
           }
@@ -861,6 +875,9 @@ Quintus.Input = function(Q) {
           if(collision) {
             p.vx = -p.speed * collision.normalY;
             p.vy = p.speed * collision.normalX;
+          } else if(p.vx!=0){
+            p.vy = p.speed*(Math.sin(Math.PI/4));
+			p.vx *=  Math.cos(Math.PI/4);
           } else {
             p.vy = p.speed;
           }
@@ -871,8 +888,16 @@ Quintus.Input = function(Q) {
 		if(!Q.inputs['right']&&!Q.inputs['left']){
 		  p.vx = 0;
         }
+		
+		if(Q.inputs['swordAttack']){
+			this.entity.trigger('swordAttack', this.entity);
+		}
 
-        if(p.landed > 0 && (Q.inputs['up'] || Q.inputs['action']) && !p.jumping) {
+		if(Q.inputs['shurikenAttack']){
+			this.entity.trigger('shurikenAttack', this.entity);
+		}
+
+        /*if(p.landed > 0 && (Q.inputs['up'] || Q.inputs['action']) && !p.jumping) {
           p.vy = p.jumpSpeed;
           p.landed = -dt;
           p.jumping = true;
@@ -887,7 +912,7 @@ Quintus.Input = function(Q) {
           if(p.vy < p.jumpSpeed / 3) {
             p.vy = p.jumpSpeed / 3;
           }
-        }
+        }*/
       }
       p.landed -= dt;
     }
