@@ -19,11 +19,12 @@ var game = function(){
 		 .controls().touch().enableSound();
 
 	Q.debug = true;
-	Q.load(["htt.png", "htt.json","cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
+	Q.load(["katana.png", "katana.json", "htt.png", "htt.json","cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("htt.png", "htt.json");
 		Q.compileSheets("cursor.png", "cursor.json");
 		Q.compileSheets("enemy.png", "enemy.json");
+		Q.compileSheets("katana.png", "katana.json");
 	});
 
 	Q.animations("hattori_anim", {
@@ -61,15 +62,18 @@ var game = function(){
 	Q.Sprite.extend("Hattori", {
 		init: function(){
 			this._super({
-				sheet: "htt",
+				sheet: "hattori",
 				sprite: "hattori_anim",
 				x:500,
 				y:500,
-				scale:0.7,
+				scale:0.5,
 				coldown:false,
 				attackType: false,	//false = shuriken, true = sword
-				attacking: false
+				attacking: false,
+				katana:0,
+				first:true
 			});
+			
 			this.add('2d, animation, platformerControls');
 			this.on("hit", "kill");
 			this.on("attackFin", this, "attackFin");
@@ -94,7 +98,7 @@ var game = function(){
 			var self = this;
 			if(this.p.attackType){ //sword attack
 				this.p.attacking = true;
-				this.play("attack");
+				this.p.katana.animate({ x: this.p.x, y: this.p.y, angle: -180 });
 				console.log(this.p.attacking);
 			}else{	//shuriken attack
 				if(!this.p.coldown){
@@ -135,12 +139,21 @@ var game = function(){
 			return angle;
 		},
 		step: function(dt){
-			
+			if(this.p.first){
+				//this.p.katana = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir}));
+				this.p.first=!this.p.first;
+			}
+			//console.log(this.p.x+" "+this.p.y);
 			this.p.dir = this.trigonometry(mousex, mousey);
 			this.p.angle=-this.p.dir-90;
 			//this.c.angle = -this.trigonometry(mousex, mousey)-90;
 			originX = this.p.x;
 			originY = this.p.y;
+
+			/*this.p.katana.p.angle=this.p.angle;
+			this.p.katana.p.x=(this.p.x);
+			this.p.katana.p.y=(this.p.y);
+*/
 		}
 
 	});
@@ -230,8 +243,8 @@ var game = function(){
 				}
 			this.p.cono.p.angle=this.p.angle;
 			
-			this.p.cono.p.x=(this.p.x);//*Math.cos(this.p.angle*(Math.PI/180));
-			this.p.cono.p.y=(this.p.y);//*Math.sin(this.p.angle*(Math.PI/180));
+			this.p.cono.p.x=this.p.x+(this.p.h/2+this.p.cono.p.h/2)*Math.cos(this.p.dir*Math.PI/180);
+			this.p.cono.p.y=this.p.y-(this.p.h/2+this.p.cono.p.h/2)*Math.sin(this.p.dir*Math.PI/180);
 			
 		}
 
@@ -285,6 +298,33 @@ var game = function(){
 		}
 	});
 	
+	////////////////////////////Katana//////////////////////
+	Q.Sprite.extend("Katana",{
+		init:function(p){
+			this._super(p,{
+				dir:0,
+				asset:"katana.png",
+				sensor: true,
+				scale:0.1,
+				cy:0
+			});
+			this.p.h=this.p.h*2;
+			this.add('2d, animation, tween');
+			this.on("hit",this,"hit");
+		},
+		hit: function(collision){
+			if(!collision.obj.isA("Hattori")){
+				
+				if(collision.obj.isA("Enemy")){
+					collision.obj.die();
+				}
+			}
+		},
+		step:function(){
+			
+		}
+	});
+	
 	
 
 	/////////////////////////////cursor////////////////////
@@ -325,7 +365,6 @@ var game = function(){
 				opacity: 0.5,
 				alert: false
 			});
-			this.p.cy=0;
 			this.p.sensor=true;
 			this.on("hit", this, "hit");
 		},
@@ -333,11 +372,11 @@ var game = function(){
 		hit: function(collision){
 			if(collision.obj.isA("Hattori")){
 				this.p.alert = true;
-				this.destroy();
+				//this.destroy();
 			}
 		},	
 		step:function(dt){
-
+			console.log(this.p.x+" "+this.p.y);
 		}
 	});
 	
