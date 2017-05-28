@@ -18,18 +18,18 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-		Q.debug = true;
-		Q.load(["htt.png", "htt.json","cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
-			Q.compileSheets("hattori.png", "hattori.json");
-			Q.compileSheets("htt.png", "htt.json");
-			Q.compileSheets("cursor.png", "cursor.json");
-			Q.compileSheets("enemy.png", "enemy.json");
-		});
+	Q.debug = true;
+	Q.load(["htt.png", "htt.json","cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
+		Q.compileSheets("hattori.png", "hattori.json");
+		Q.compileSheets("htt.png", "htt.json");
+		Q.compileSheets("cursor.png", "cursor.json");
+		Q.compileSheets("enemy.png", "enemy.json");
+	});
 
-		Q.animations("hattori_anim", {
-  			atack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/40, flip: false, loop:false, next:"stand"}, 
-  			stand: { frames: [0], rate: 1/10, flip:false}
-		});
+	Q.animations("hattori_anim", {
+		attack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/30, flip: false, loop:false, next:"stand", trigger: "attackFin"}, 
+		stand: { frames: [0], rate: 1/10, flip:false}
+	});
 		
 		
 	var originX = Q.width/2;
@@ -56,7 +56,7 @@ var game = function(){
 
 	//Q.el.style.cursor='none';
 
-	//////////////////////////////////Hattori////////////////////
+	//////////////////////////////////Hattori////////////////////////////////////////////////////////////////////////////////////////////
 	Q.Sprite.extend("Hattori", {
 		init: function(){
 			this._super({
@@ -65,34 +65,64 @@ var game = function(){
 				x:500,
 				y:500,
 				scale:0.7,
-				coldown:false
+				coldown:false,
+				attackType: false,	//false = shuriken, true = sword
+				attacking: false
 			});
 			this.add('2d, animation, platformerControls');
+			this.on("hit", "kill");
+			this.on("attackFin", this, "attackFin");
 			//console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");
 			var self=this;
-			//---------------THROW SHURIKEN--------------
+			
+			//---------------ATTACK--------------
 			document.addEventListener("click", function (evt) {
 				self.fire(evt);
 			});
+			//---------------Change Attack------------
+			document.addEventListener("keyup", function (evt) {
+				if(evt.which == 32)
+					self.p.attackType = !self.p.attackType;
+			});
+			
 			this.play("stand");
-
+			
 		  },
 		  
-		  fire: function(evt){
-		  	 this.play("atack");
-		  	//console.log("vengadores reunios!");
-			if(!this.p.coldown){
-				var mouse = getMouse(evt);
-				this.p.coldown = true;
-				/*var dx = -this.p.w*this.p.scale-1;
-				var velx = -100;
-				if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}*/
-				var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir}));
-				var self = this;
-				//console.log("Hattori "+this.p.x+" "+this.p.y);
-				setTimeout(function(){self.p.coldown=false;}, 100);
+		fire: function(evt){
+			var self = this;
+			if(this.p.attackType){ //sword attack
+				this.p.attacking = true;
+				this.play("attack");
+				console.log(this.p.attacking);
+			}else{	//shuriken attack
+				if(!this.p.coldown){
+					var mouse = getMouse(evt);
+					this.p.coldown = true;
+					/*var dx = -this.p.w*this.p.scale-1;
+					var velx = -100;
+					if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}*/
+					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir}));
+					var self = this;
+					//console.log("Hattori "+this.p.x+" "+this.p.y);
+					setTimeout(function(){self.p.coldown=false;}, 100);
+				}
 			}
-		  },
+		
+		},
+		
+		attackFin: function(){
+			this.p.attacking = false;
+			console.log(this.p.attacking);
+		},
+		
+		kill: function(collision){
+			if(this.p.attacking){	
+				if(collision.obj.isA("Enemy")){
+					collision.obj.die();
+				}
+			}
+		},
 
      	trigonometry: function (x, y){
 			var cos=(x-Q.width / 2)/(Q.width/2);
@@ -104,7 +134,7 @@ var game = function(){
 			return angle;
 		},
 		step: function(dt){
-			//console.log(this.p.x+" "+this.p.y);
+			
 			this.p.dir = this.trigonometry(mousex, mousey);
 			this.p.angle=-this.p.dir-90;
 			//this.c.angle = -this.trigonometry(mousex, mousey)-90;
@@ -114,7 +144,7 @@ var game = function(){
 
 	});
 	
-	//--------------------Enemy------------------
+	//--------------------Enemy------------------------------------------------------------------
 	Q.Sprite.extend("Enemy", {
 		init: function(p){
 			this._super(p, {
