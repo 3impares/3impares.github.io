@@ -38,6 +38,7 @@ var game = function(){
 	var center;
 	
 	var mousex=0, mousey=0;
+	var hattori;
 	
 	Q.el.addEventListener('mousemove',function(e) {
 		var rect = canvas.getBoundingClientRect();
@@ -153,50 +154,80 @@ var game = function(){
 				x:1500,
 				y:500,
 				scale:0.5,
+				dir:270,
 				coldown:false,
-				vy:100,
+				time:0,
+				patrolTime:4000,
+				patrol:100,
+				vel:300,
 				state:0,
-				htt:0,
 				cono: 0
 			});
-			this.add('2d, animation, aiBounce, tween');
+			this.add('2d, animation, tween');
 			//console.log("mi nombre es iñigo montoya, tu mataste a mi padre, preparate a morir");
-			this.on("bump.top",function(collision) { this.p.vy=100;});
-		 	this.on("bump.bottom",function(collision) {	this.p.vy=-100;});
+			this.on("bump.top, bump.bottom","wally");
+		 	this.on("bump.right, bump.left","wallx");
 		 	
 		 	var self=this;
 			document.addEventListener("dblclick", function (evt) {
 				self.fire(evt);
 			});
 		},
+		
+		wallx:function(){
+			if(this.p.state==0){
+				this.p.dir=(this.p.dir+90)%360;
+			}
+		},
+		
+		wally:function(){
+			if(this.p.state==0){
+				this.p.dir=-this.p.dir;
+			}
+		},
+		
 		die: function(){
 			this.p.cono.destroy();
 			this.destroy();
 		},
 		fire: function(evt){
-			//this.state=!this.state;
+			if(this.p.state==0)
+				this.p.state=1;
+			else 
+				this.p.state=0;
 		},
 		trigonometry: function (x, y){
 			var cos=(x-this.p.x)/(this.p.x);
 			var sin=-(y-this.p.y)/(this.p.y);
 			
 			angle=(Math.atan(sin/cos)/(Math.PI/180));
-			if(cos<0)angle+=180;
+			if(cos<0)
+				angle+=180;
 
 			return angle;
 		},
 		step: function(dt){
 			this.play("stand");
-			
+			this.p.angle=-this.p.dir-90;
+			var v;
+			if(this.p.state==1){
+				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
+				v=this.p.vel;
+			}
+			else{
+				this.p.time+=dt*1000;
+				if(this.p.time>=this.p.patrolTime){
+					this.p.dir+=180;
+					this.p.time=0;
+				}
+				v=this.p.patrol;
+			}
+			this.p.vy=-v*Math.sin(this.p.dir*Math.PI/180);
+			this.p.vx=v*Math.cos(this.p.dir*Math.PI/180);
 			if(this.p.cono.p.alert){
-				this.state = 1;
-			}
-			
-			if(this.state==1){
-				this.p.angle = -this.trigonometry(this.p.htt.p.x, this.p.htt.p.y)-90;
-				this.p.vx=(this.p.htt.p.x-this.p.x)*2;
-				this.p.vy=(this.p.htt.p.y-this.p.y)*2;
-			}
+				this.p.state = 1;
+				this.p.cono.p.alert=false;
+				}
 			this.p.cono.p.angle=this.p.angle;
 			
 			this.p.cono.p.x=(this.p.x);//*Math.cos(this.p.angle*(Math.PI/180));
@@ -239,6 +270,7 @@ var game = function(){
 		
 		hit: function(collision){
 			if(!collision.obj.isA("Hattori")){
+				
 				if(collision.obj.isA("Enemy")){
 					collision.obj.die();
 				}
@@ -303,7 +335,7 @@ var game = function(){
 				this.p.alert = true;
 				this.destroy();
 			}
-		},
+		},	
 		step:function(dt){
 
 		}
@@ -323,16 +355,16 @@ var game = function(){
 	Q.scene('mapa1', function(stage) {
 		Q.stageTMX("mapa1.tmx", stage);
 		center = stage.add("viewport");
-		var hattori = stage.insert(new Q.Hattori());
+		hattori = stage.insert(new Q.Hattori());
 		
-		var enemies=[];
+		/*var enemies=[];
 		for(var i=0; i<46; i++){
 			var cn=stage.insert(new Q.Cono({x:(i+10)*100, y:600}));
 			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100, cono: cn}));
 
-		}
-		//var cn=stage.insert(new Q.Cono({ y:600}));
-		//var enemy=stage.insert(new Q.Enemy({htt:hattori, cono:cn}));
+		}*/
+		var cn=stage.insert(new Q.Cono({ y:600}));
+		var enemy=stage.insert(new Q.Enemy({cono:cn}));
 
 
 		center.follow(hattori, {x:true, y:true});
