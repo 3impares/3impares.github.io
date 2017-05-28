@@ -18,29 +18,26 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-		Q.load(["cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
+		Q.debug = true;
+		Q.load(["htt.png", "htt.json","cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
 			Q.compileSheets("hattori.png", "hattori.json");
+			Q.compileSheets("htt.png", "htt.json");
 			Q.compileSheets("cursor.png", "cursor.json");
 			Q.compileSheets("enemy.png", "enemy.json");
 		});
-		
-		Q.imageData = function(img) {
-		  var canvas = $("<canvas>").attr({ 
-		                       width: img.width, 
-		                       height: img.height })[0];
-		  
-		  var ctx = canvas.getContext("2d");
-		  ctx.drawImage(img,0,0);
 
-		  return ctx.getImageData(0,0,img.width,img.height);
-		}
+		Q.animations("hattori_anim", {
+  			atack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/40, flip: false, loop:false, next:"stand"}, 
+  			stand: { frames: [0], rate: 1/10, flip:false}
+		});
+		
 		
 	var originX = Q.width/2;
 	var originY = Q.height/2;
 	var canvas = document.getElementById('quintus');
 	var center;
 	
-	var mousex, mousey;
+	var mousex=0, mousey=0;
 	
 	Q.el.addEventListener('mousemove',function(e) {
 		var rect = canvas.getBoundingClientRect();
@@ -63,11 +60,11 @@ var game = function(){
 	Q.Sprite.extend("Hattori", {
 		init: function(){
 			this._super({
-				sheet: "hattori",
-				sprite: "hattori anim",
+				sheet: "htt",
+				sprite: "hattori_anim",
 				x:500,
 				y:500,
-				scale:0.5,
+				scale:0.7,
 				coldown:false
 			});
 			this.add('2d, animation, platformerControls');
@@ -77,9 +74,12 @@ var game = function(){
 			document.addEventListener("click", function (evt) {
 				self.fire(evt);
 			});
+			this.play("stand");
+
 		  },
 		  
 		  fire: function(evt){
+		  	 this.play("atack");
 		  	//console.log("vengadores reunios!");
 			if(!this.p.coldown){
 				var mouse = getMouse(evt);
@@ -104,8 +104,7 @@ var game = function(){
 			return angle;
 		},
 		step: function(dt){
-			////console.log(this.p.x+" "+this.p.y);
-			this.play("stand");
+			//console.log(this.p.x+" "+this.p.y);
 			this.p.dir = this.trigonometry(mousex, mousey);
 			this.p.angle=-this.p.dir-90;
 			//this.c.angle = -this.trigonometry(mousex, mousey)-90;
@@ -115,9 +114,6 @@ var game = function(){
 
 	});
 	
-	Q.animations('hattori anim', {
-		stand: { frames: [0], rate: 1 }
-	});
 	//--------------------Enemy------------------
 	Q.Sprite.extend("Enemy", {
 		init: function(p){
@@ -148,7 +144,7 @@ var game = function(){
 			this.destroy();
 		},
 		fire: function(evt){
-			this.state=!this.state;
+			//this.state=!this.state;
 		},
 		trigonometry: function (x, y){
 			var cos=(x-this.p.x)/(this.p.x);
@@ -213,11 +209,11 @@ var game = function(){
 		
 		hit: function(collision){
 			if(!collision.obj.isA("Hattori")){
-				
 				if(collision.obj.isA("Enemy")){
 					collision.obj.die();
 				}
-				this.destroy();
+				if(!collision.obj.isA("Cono"))
+					this.destroy();
 			}
 		},
 		
@@ -278,61 +274,8 @@ var game = function(){
 				this.destroy();
 			}
 		},
-		
 		step:function(dt){
-		/*	var col;
-			if(col = this.checkCollision()) {
-			  if(col == 1 && Math.abs(p.vy) < 30) { 
-			    if(p.vy > 0) {
-			      p.vy = 0; 
-			    }
-			  } else {
-			    this.dead=true;
-				}
-			}
-    	*/
-		},
-		checkCollision: function() {
-/*	          var bgData = Q.backgroundPixels;
 
-	          // Get a integer based position from our
-	          // x and y values
-	          var bgx = Math.floor(this.p.x);
-	          var bgy = Math.floor(this.p.y);
-
-	          // Calculate the initial offset into our background
-	          var bgOffset = bgx * 4 + bgy * bgData.width * 4 + 3;
-
-	          // Pull out our data easy access
-	          var pixels = this.imageData.data;
-	          var bgPixels = bgData.data;
-
-	          for(var sy=0;sy < this.imageData.height;sy++) {
-	            for(var sx=0;sx < this.imageData.width;sx++) {
-	              // Check for an existing pixel on our ship
-	              if(pixels[sx*4 + sy * this.imageData.width * 4 + 3]) {
-
-	                // Then check for a matching existing pixel 
-	                // on the background starting from our bgOffest 
-	                // and then indexing in from there
-	                if(bgPixels[bgOffset + sx*4 + sy * bgData.width * 4]) {
-
-	                  // Next check if we are at the bottom of the lander
-	                  // if so return 1, to indicate that we might be landing
-	                  // instead of crashing
-	                  if(sy > this.imageData.height - 2) {
-	                    return 1;
-	                    } else {
-	                    // Otherwise return 2 and...Boom!
-	                    return 2;
-	                  }
-	                }
-	              }
-	            }
-	          }
-	          return 0;
-	      }
-*/
 		}
 	});
 	
@@ -352,14 +295,14 @@ var game = function(){
 		center = stage.add("viewport");
 		var hattori = stage.insert(new Q.Hattori());
 		
-		/*var enemies=[];
+		var enemies=[];
 		for(var i=0; i<46; i++){
 			var cn=stage.insert(new Q.Cono({x:(i+10)*100, y:600}));
 			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100, cono: cn}));
 
-		}*/
-		var cn=stage.insert(new Q.Cono({ y:600}));
-		var enemy=stage.insert(new Q.Enemy({htt:hattori, cono:cn}));
+		}
+		//var cn=stage.insert(new Q.Cono({ y:600}));
+		//var enemy=stage.insert(new Q.Enemy({htt:hattori, cono:cn}));
 
 
 		center.follow(hattori, {x:true, y:true});
