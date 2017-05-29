@@ -19,12 +19,23 @@ var game = function(){
 		 .controls().touch().enableSound();
 
 	Q.debug = true;
-	Q.load(["katana.png", "katana.json", "htt.png", "htt.json","cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
+
+	Q.state.set({
+		shurikens:20,
+		weapon:"katana_sym.png"
+	});
+
+
+	Q.load(["katana.png", "katana.json", "htt.png", "htt.json","cono.png","hattori.png",
+	 "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json",
+	 "shuriken_sym.png", "shuriken_sym.json", "katana_sym.png", "katana_sym.json"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("htt.png", "htt.json");
 		Q.compileSheets("cursor.png", "cursor.json");
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
+		Q.compileSheets("katana_sym.png", "katana_sym.json");
+		Q.compileSheets("shuriken_sym.png", "shuriken_sym.json");
 	});
 
 	Q.animations("hattori_anim", {
@@ -72,7 +83,8 @@ var game = function(){
 				changing: false,
 				katana:0,
 				first:true,
-				coldRoll:0
+				coldRoll:0,
+				shurikens:20
 		});
 			
 			this.add('2d, animation, platformerControls, tween');
@@ -84,15 +96,21 @@ var game = function(){
 			this.on("roll", this, "roll");
 			//console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");			
 			this.play("stand");
-			
+
+			Q.state.set("shurikens", this.p.shurikens);
+			Q.stageScene("HUD", 1, {weapon:{asset:"katana_sym.png"}});
 		},
 		  
 		swordAttack: function(){
+			Q.state.set("weapon", "katana_sym.png");
+			Q.stageScene("HUD", 1, {weapon:{asset:"katana_sym.png"}});
 			this.p.attackType = true;
 		},
 		  
 		shurikenAttack: function(){
 			this.p.attackType = false;
+			Q.state.set("weapon", "shuriken_sym.png");
+			Q.stageScene("HUD", 1, {y: 200, weapon:{asset:"shuriken_sym.png"}});
 		},
 		roll: function(){
 			if(this.p.coldRoll==0){
@@ -107,7 +125,7 @@ var game = function(){
 				this.p.katana.animate({angle: 180 });
 
 			}else{	//shuriken attack
-				if(!this.p.coldown){
+				if(!this.p.coldown && this.p.shurikens>0){
 					var mouse = getMouse(evt);
 					this.p.coldown = true;
 					/*var dx = -this.p.w*this.p.scale-1;
@@ -117,6 +135,10 @@ var game = function(){
 					var self = this;
 					//console.log("Hattori "+this.p.x+" "+this.p.y);
 					setTimeout(function(){self.p.coldown=false;}, 100);
+					
+					this.p.shurikens--;
+					Q.state.set("shurikens", this.p.shurikens);
+					Q.stageScene("HUD", 1, {sh: {label: "Shurikens "+Q.state.get("shurikens")}});
 				}
 			}
 		
@@ -403,6 +425,13 @@ var game = function(){
 		}
 	});
 	
+	Q.scene("HUD",function(stage) {
+		var sh = new Q.UI.Text({x: Q.width/6, y: 20, label: "Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
+  		stage.insert(sh);
+		var weapon = new Q.Sprite({x: Q.width/6, y: 100, asset: Q.state.get("weapon")});
+		stage.insert(weapon);
+
+	});
 
 
 
@@ -431,5 +460,6 @@ var game = function(){
 
 		center.follow(hattori, {x:true, y:true});
 	});
-
+	Q.stageScene('level1', 0);
+    Q.stageScene('HUD', 1);
 }
