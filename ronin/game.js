@@ -241,8 +241,8 @@ var game = function(){
 				}
 			this.p.cono.p.angle=this.p.angle;
 			
-			this.p.cono.p.x=this.p.x+(this.p.h/2+this.p.cono.p.h/2)*Math.cos(this.p.dir*Math.PI/180);
-			this.p.cono.p.y=this.p.y-(this.p.h/2+this.p.cono.p.h/2)*Math.sin(this.p.dir*Math.PI/180);
+			this.p.cono.p.x=this.p.x+(this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
+			this.p.cono.p.y=this.p.y-(this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
 			
 		}
 
@@ -361,7 +361,8 @@ var game = function(){
 				x: 500,
 				y: 800,
 				opacity: 0.5,
-				alert: false
+				alert: false,
+				scale:0.7
 			});
 			this.p.sensor=true;
 			this.on("hit", this, "hit");
@@ -374,7 +375,7 @@ var game = function(){
 			}
 		},	
 		step:function(dt){
-			console.log(this.p.x+" "+this.p.y);
+			//console.log(this.p.x+" "+this.p.y);
 		}
 	});
 	
