@@ -71,15 +71,18 @@ var game = function(){
 				attackType: true,	//false = shuriken, true = sword
 				changing: false,
 				katana: 0,
-				first:true
+				first:true,
+				coldRoll:0
 			});
 			var kat = this.p.katana;
-			this.add('2d, animation, platformerControls');
+			
+			this.add('2d, animation, platformerControls, tween');
 			this.on("hit", "kill");
 			this.on("attackFin", this, "attackFin");
 			this.on("swordAttack", this, "swordAttack");
 			this.on("shurikenAttack", this, "shurikenAttack");
 			this.on("clickEvent", this, "fire");
+			this.on("roll", this, "roll");
 			//console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");			
 			this.play("stand");
 			
@@ -92,7 +95,12 @@ var game = function(){
 		shurikenAttack: function(){
 			this.p.attackType = false;
 		},
-		
+		roll: function(){
+			if(this.p.coldRoll==0){
+				this.p.coldRoll=50;
+				this.animate({speed:800}, 0.2, {callback: function(){this.p.speed=400}});
+			}
+		},
 		fire: function(evt){
 			var self = this;
 			var kat = this.kat.p;
@@ -163,6 +171,11 @@ var game = function(){
 			//this.c.angle = -this.trigonometry(mousex, mousey)-90;
 			originX = this.p.x;
 			originY = this.p.y;
+
+			if(this.p.coldRoll){
+				this.p.coldRoll--;
+			}
+
 			
 			this.kat.p.angle = this.p.angle;
 			//this.p.katana.p.x = this.p.x - this.p.w/4;
@@ -193,7 +206,8 @@ var game = function(){
 				patrol:100,
 				vel:300,
 				state:0,
-				cono: 0
+				cono: 0,
+				first:true
 			});
 			this.add('2d, animation, tween');
 			//console.log("mi nombre es iñigo montoya, tu mataste a mi padre, preparate a morir");
@@ -239,6 +253,10 @@ var game = function(){
 			return angle;
 		},
 		step: function(dt){
+			if(this.p.first){
+				this.p.cono = this.stage.insert(new Q.Cono());
+				this.p.first=false;
+			}
 			this.play("stand");
 			this.p.angle=-this.p.dir-90;
 			var v;
@@ -256,10 +274,12 @@ var game = function(){
 			}
 			this.p.vy=-v*Math.sin(this.p.dir*Math.PI/180);
 			this.p.vx=v*Math.cos(this.p.dir*Math.PI/180);
-			if(this.p.cono.p.alert){
+			if(this.p.cono.p.alert>0)
 				this.p.state = 1;
-				this.p.cono.p.alert=false;
-				}
+			else
+				this.p.state = 0;
+
+
 			this.p.cono.p.angle=this.p.angle;
 			
 			this.p.cono.p.x=this.p.x+(this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
@@ -382,7 +402,7 @@ var game = function(){
 				x: 500,
 				y: 800,
 				opacity: 0.5,
-				alert: false,
+				alert: 0,
 				scale:0.7
 			});
 			this.p.sensor=true;
@@ -390,13 +410,15 @@ var game = function(){
 		},
 		
 		hit: function(collision){
-			if(collision.obj.isA("Hattori")){
-				this.p.alert = true;
-				//this.destroy();
+			if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
+				this.p.alert = 300;
 			}
+
 		},	
 		step:function(dt){
 			//console.log(this.p.x+" "+this.p.y);
+			if(this.p.alert>0)
+				this.p.alert--;
 		}
 	});
 	
@@ -418,12 +440,12 @@ var game = function(){
 		
 		/*var enemies=[];
 		for(var i=0; i<46; i++){
-			var cn=stage.insert(new Q.Cono({x:(i+10)*100, y:600}));
-			enemies[i]=stage.insert(new Q.Enemy({htt:hattori, x:(i+10)*100, cono: cn}));
+		
+			enemies[i]=stage.insert(new Q.Enemy({x:(i+10)*100}));
 
 		}*/
-		var cn=stage.insert(new Q.Cono({ y:600}));
-		var enemy=stage.insert(new Q.Enemy({cono:cn}));
+		
+		var enemy=stage.insert(new Q.Enemy({}));
 
 
 		center.follow(hattori, {x:true, y:true});

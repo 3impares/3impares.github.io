@@ -67,6 +67,7 @@ Quintus.Input = function(Q) {
 	DOWN: 'down',	S: 'down',
 	Q: 'shurikenAttack',
 	E: 'swordAttack',
+	<: 'roll',
     SPACE: 'fire',
     Z: 'fire',
     X: 'action',
@@ -896,7 +897,9 @@ Quintus.Input = function(Q) {
 		if(Q.inputs['shurikenAttack']){
 			this.entity.trigger('shurikenAttack', this.entity);
 		}
-
+    if(Q.inputs['roll']){
+      this.entity.trigger('roll', this.entity);
+    }
         /*if(p.landed > 0 && (Q.inputs['up'] || Q.inputs['action']) && !p.jumping) {
           p.vy = p.jumpSpeed;
           p.landed = -dt;
