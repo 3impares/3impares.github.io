@@ -73,7 +73,7 @@ var game = function(){
 				katana:0,
 				first:true,
 				coldRoll:0
-			});
+		});
 			
 			this.add('2d, animation, platformerControls, tween');
 			this.on("hit", "kill");
@@ -104,7 +104,7 @@ var game = function(){
 			var self = this;
 			if(this.p.attackType){ //sword attack
 				this.p.attacking = true;
-				this.p.katana.animate({ x: this.p.x, y: this.p.y, angle: -180 });
+				this.p.katana.animate({angle: 180 });
 
 			}else{	//shuriken attack
 				if(!this.p.coldown){
@@ -145,7 +145,7 @@ var game = function(){
 		},
 		step: function(dt){
 			if(this.p.first){
-				//this.p.katana = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir}));
+				this.p.katana = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir}));
 				this.p.first=!this.p.first;
 			}
 			//console.log(this.p.x+" "+this.p.y);
@@ -159,10 +159,13 @@ var game = function(){
 				this.p.coldRoll--;
 			}
 
-			/*this.p.katana.p.angle=this.p.angle;
-			this.p.katana.p.x=(this.p.x);
-			this.p.katana.p.y=(this.p.y);
-*/
+			
+			this.p.katana.p.angle = this.p.angle + 180;
+			//this.p.katana.p.x = this.p.x - this.p.w/4;
+			//this.p.katana.p.y = this.p.y - this.p.h/4;
+			
+			this.p.katana.p.x = this.p.x + (this.p.w/4 * Math.sin(this.p.dir*Math.PI/180));
+			this.p.katana.p.y = this.p.y + (this.p.h/2 * Math.cos(this.p.dir*Math.PI/180));
 		}
 
 	});
@@ -322,15 +325,16 @@ var game = function(){
 				asset:"katana.png",
 				sensor: true,
 				scale:0.1,
-				cy:0
+				cy: 0,
+				cx: 0
 			});
 			this.p.h=this.p.h*2;
-			this.add('2d, animation, tween');
-			this.on("hit",this,"hit");
+			this.add('2animation, tween');
+			this.size(true);
+			//this.on("hit",this,"hit");
 		},
 		hit: function(collision){
 			if(!collision.obj.isA("Hattori")){
-				
 				if(collision.obj.isA("Enemy")){
 					collision.obj.die();
 				}
