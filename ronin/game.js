@@ -18,7 +18,7 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-	Q.debug = true;
+	Q.debug = false;
 	Q.load(["katana.png", "katana.json", "htt.png", "htt.json","cono.png","hattori.png", "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("htt.png", "htt.json");
@@ -103,26 +103,27 @@ var game = function(){
 			var self = this;
 			var kat = this.kat.p;
 			if(this.p.attackType){ //sword attack
-				kat.attacking = true;
-				console.log(this.p.dir);
-				this.kat.animate({angle: kat.angle+60}, 0.05, Q.Easing.Linear, { callback: function() { console.log("cambio "+kat.x +" "+kat.y);} })
-				
-				.chain({x: kat.x+(150)*(Math.sin(this.p.dir*Math.PI/180))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
-						y: kat.y-(70)*(Math.sin(this.p.dir*Math.PI/180))+(150)*(Math.cos(this.p.dir*Math.PI/180)), 
-						angle: kat.angle+240}, 0.1, Q.Easing.Linear)
-						
-				.chain({x: kat.x+(150)*(Math.sin(this.p.dir*Math.PI/180))+(70)*(Math.cos(this.p.dir*Math.PI/180)), 
-						y: kat.y-(70)*(Math.sin(this.p.dir*Math.PI/180))+(150)*(Math.cos(this.p.dir*Math.PI/180)), 
-						angle: kat.angle+240}, 0.1, Q.Easing.Linear, 
-						{ callback: function() { console.log("vuelta "); this.p.attacking = false;} })
-						
-				.chain({x: kat.x, 
-						y: kat.y, 
-						angle: kat.angle}, 0.2, Q.Easing.Linear, 
-						{ callback: function() { console.log("fin "); kat.attacking = false;} });
-
+				if(this.p.coldown==0){
+					this.p.coldown=50;
+					kat.attacking = true;
+					this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
+					
+					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
+							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180)), 
+							angle: kat.angle+100}, 0.1, Q.Easing.Linear)
+					
+					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(150)*(Math.sin(this.p.dir*Math.PI/180))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
+							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180))+(150)*(Math.cos(this.p.dir*Math.PI/180)), 
+							angle: kat.angle+240}, 0.1, Q.Easing.Linear)
+					
+					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180))), 
+							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180))), 
+							angle: kat.angle}, 0.3, Q.Easing.Quadratic.Out, 
+							{ callback: function() { console.log("fin "); kat.attacking = false;} });
+				}
 			}else{	//shuriken attack
-				if(!this.p.coldown){
+				if(this.p.coldown==0){
+					this.p.coldown=50;
 					var mouse = getMouse(evt);
 					this.p.coldown = true;
 					/*var dx = -this.p.w*this.p.scale-1;
@@ -130,15 +131,9 @@ var game = function(){
 					if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}*/
 					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir}));
 					var self = this;
-					//console.log("Hattori "+this.p.x+" "+this.p.y);
-					setTimeout(function(){self.p.coldown=false;}, 100);
 				}
 			}
 		
-		},
-		
-		attackFin: function(){
-			this.kat.p.attacking = false;
 		},
 
      	trigonometry: function (x, y){
@@ -150,20 +145,29 @@ var game = function(){
 
 			return angle;
 		},
+		
 		step: function(dt){
 			if(this.p.first){
 				this.kat = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir}));
 				this.p.first=!this.p.first;
 			}
-			//console.log(this.p.x+" "+this.p.y);
+			if(this.kat.p.attacking){
+				this.kat.p.opacity = 1;
+			}else{
+				this.kat.p.opacity = 0;
+			}
+			
 			this.p.dir = this.trigonometry(mousex, mousey);
 			this.p.angle=-this.p.dir-90;
-			//this.c.angle = -this.trigonometry(mousex, mousey)-90;
 			originX = this.p.x;
 			originY = this.p.y;
 
 			if(this.p.coldRoll){
 				this.p.coldRoll--;
+			}
+	
+			if(this.p.coldown){
+				this.p.coldown--;
 			}
 	
 			this.kat.p.angle = this.p.angle;
@@ -200,10 +204,6 @@ var game = function(){
 			this.on("bump.top, bump.bottom","wally");
 		 	this.on("bump.right, bump.left","wallx");
 		 	
-		 	var self=this;
-			document.addEventListener("dblclick", function (evt) {
-				self.fire(evt);
-			});
 		},
 		
 		wallx:function(){
@@ -414,7 +414,7 @@ var game = function(){
 
 
 
-	Q.loadTMX("mapa1.tmx",function() {
+	Q.loadTMX("mapa2.tmx",function() {
 		Q.stageScene("mapa1");
 		//Q.debug = true;
 	});
@@ -423,7 +423,7 @@ var game = function(){
 	// ## Level1 scene
 		// Create a new scene called level 1
 	Q.scene('mapa1', function(stage) {
-		Q.stageTMX("mapa1.tmx", stage);
+		Q.stageTMX("mapa2.tmx", stage);
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori());
 		
