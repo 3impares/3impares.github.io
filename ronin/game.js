@@ -68,8 +68,8 @@ var game = function(){
 				y:500,
 				scale:0.5,
 				coldown:false,
-				attackType: false,	//false = shuriken, true = sword
-				attacking: false,
+				attackType: true,	//false = shuriken, true = sword
+				changing: false,
 				katana:0,
 				first:true
 			});
@@ -77,29 +77,28 @@ var game = function(){
 			this.add('2d, animation, platformerControls');
 			this.on("hit", "kill");
 			this.on("attackFin", this, "attackFin");
-			//console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");
-			var self=this;
-			
-			//---------------ATTACK--------------
-			document.addEventListener("click", function (evt) {
-				self.fire(evt);
-			});
-			//---------------Change Attack------------
-			document.addEventListener("keyup", function (evt) {
-				if(evt.which == 32)
-					self.p.attackType = !self.p.attackType;
-			});
-			
+			this.on("swordAttack", this, "swordAttack");
+			this.on("shurikenAttack", this, "shurikenAttack");
+			this.on("clickEvent", this, "fire");
+			//console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");			
 			this.play("stand");
 			
-		  },
+		},
 		  
+		swordAttack: function(){
+			this.p.attackType = true;
+		},
+		  
+		shurikenAttack: function(){
+			this.p.attackType = false;
+		},
+		
 		fire: function(evt){
 			var self = this;
 			if(this.p.attackType){ //sword attack
 				this.p.attacking = true;
 				this.p.katana.animate({ x: this.p.x, y: this.p.y, angle: -180 });
-				console.log(this.p.attacking);
+
 			}else{	//shuriken attack
 				if(!this.p.coldown){
 					var mouse = getMouse(evt);
@@ -118,7 +117,6 @@ var game = function(){
 		
 		attackFin: function(){
 			this.p.attacking = false;
-			console.log(this.p.attacking);
 		},
 		
 		kill: function(collision){
