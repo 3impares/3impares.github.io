@@ -18,7 +18,7 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-	Q.debug = true;
+	//Q.debug = true;
 
 	Q.state.set({
 		shurikens:20,
@@ -223,20 +223,26 @@ var game = function(){
 				first:true
 			});
 			this.add('2d, animation, tween');
-			this.on("bump.top, bump.bottom","wally");
-		 	this.on("bump.right, bump.left","wallx");
+			this.on("bump.top, bump.bottom","collisiony");
+		 	this.on("bump.right, bump.left","collisionx");
 		 	
 		},
 		
-		wallx:function(){
+		collisionx:function(collision){
 			if(this.p.state==0){
-				this.p.dir=(this.p.dir+90)%360;
+				if(collision.obj.isA("Hattori"))
+					this.p.state=1;
+				else
+					this.p.dir=(this.p.dir+90)%360;
 			}
 		},
 		
-		wally:function(){
+		collisiony:function(collision){
 			if(this.p.state==0){
-				this.p.dir=-this.p.dir;
+				if(collision.obj.isA("Hattori"))
+					this.p.state=1;
+				else
+					this.p.dir=-this.p.dir;
 			}
 		},
 		
