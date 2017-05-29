@@ -77,13 +77,11 @@ var game = function(){
 			var kat = this.p.katana;
 			
 			this.add('2d, animation, platformerControls, tween');
-			this.on("hit", "kill");
 			this.on("attackFin", this, "attackFin");
 			this.on("swordAttack", this, "swordAttack");
 			this.on("shurikenAttack", this, "shurikenAttack");
 			this.on("clickEvent", this, "fire");
 			this.on("roll", this, "roll");
-			//console.log("pudiera llegar el día, en el que una horda de lobos y escudos rotos rubricaran la edad de los hombres, pero hoy, no es ese día");			
 			this.play("stand");
 			
 		},
@@ -105,7 +103,7 @@ var game = function(){
 			var self = this;
 			var kat = this.kat.p;
 			if(this.p.attackType){ //sword attack
-				this.p.attacking = true;
+				kat.attacking = true;
 				console.log(this.p.dir);
 				this.kat.animate({angle: kat.angle+60}, 0.05, Q.Easing.Linear, { callback: function() { console.log("cambio "+kat.x +" "+kat.y);} })
 				
@@ -121,7 +119,7 @@ var game = function(){
 				.chain({x: kat.x, 
 						y: kat.y, 
 						angle: kat.angle}, 0.2, Q.Easing.Linear, 
-						{ callback: function() { console.log("fin "); this.p.attacking = false;} });
+						{ callback: function() { console.log("fin "); kat.attacking = false;} });
 
 			}else{	//shuriken attack
 				if(!this.p.coldown){
@@ -140,15 +138,7 @@ var game = function(){
 		},
 		
 		attackFin: function(){
-			this.p.attacking = false;
-		},
-		
-		kill: function(collision){
-			if(this.p.attacking){	
-				if(collision.obj.isA("Enemy")){
-					collision.obj.die();
-				}
-			}
+			this.kat.p.attacking = false;
 		},
 
      	trigonometry: function (x, y){
@@ -175,11 +165,8 @@ var game = function(){
 			if(this.p.coldRoll){
 				this.p.coldRoll--;
 			}
-
-			
+	
 			this.kat.p.angle = this.p.angle;
-			//this.p.katana.p.x = this.p.x - this.p.w/4;
-			//this.p.katana.p.y = this.p.y - this.p.h/4;
 			
 			this.kat.p.x = this.p.x - ((this.p.w/4+this.kat.p.w*this.kat.p.scale/2) * Math.sin(this.p.dir*Math.PI/180));
 			this.kat.p.y = this.p.y - ((this.p.h/2+this.kat.p.w*this.kat.p.scale/2) * Math.cos(this.p.dir*Math.PI/180));
@@ -210,7 +197,6 @@ var game = function(){
 				first:true
 			});
 			this.add('2d, animation, tween');
-			//console.log("mi nombre es iñigo montoya, tu mataste a mi padre, preparate a morir");
 			this.on("bump.top, bump.bottom","wally");
 		 	this.on("bump.right, bump.left","wallx");
 		 	
@@ -344,18 +330,21 @@ var game = function(){
 				dir:0,
 				asset:"katana.png",
 				sensor: true,
-				scale:0.1
+				scale:0.1,
+				attacking: false
 			});
 			this.p.cy = 0;
 			this.p.cx = this.p.w/2;
 			this.add('2animation, tween');
 			this.size(true);
-			//this.on("hit",this,"hit");
+			this.on("hit",this,"hit");
 		},
 		hit: function(collision){
-			if(!collision.obj.isA("Hattori")){
-				if(collision.obj.isA("Enemy")){
-					collision.obj.die();
+			if(this.p.attacking){
+				if(!collision.obj.isA("Hattori")){
+					if(collision.obj.isA("Enemy")){
+						collision.obj.die();
+					}
 				}
 			}
 		},
