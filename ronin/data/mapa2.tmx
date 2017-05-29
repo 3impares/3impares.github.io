@@ -3,7 +3,6 @@
  <tileset firstgid="1" name="terrain-Derivation_5" tilewidth="32" tileheight="32" tilecount="256" columns="16">
   <image source="../images/terrain-Derivation_5.png" width="512" height="512"/>
  </tileset>
-<<<<<<< HEAD
  <layer name="fondo" width="250" height="100">
   <properties>
    <property name="type" type="int" value="0"/>
@@ -25011,11 +25010,6 @@
    <tile gid="7"/>
   </data>
  </layer>
-=======
- <imagelayer name="Capa de Imagen 1">
-  <image source="../images/fondo.PNG" width="388" height="484"/>
- </imagelayer>
->>>>>>> origin/master
  <layer name="Collision" width="250" height="100">
   <properties>
    <property name="collision" value="true"/>
@@ -33181,7 +33175,6 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-<<<<<<< HEAD
    <tile gid="35"/>
    <tile gid="35"/>
    <tile gid="35"/>
@@ -33190,16 +33183,6 @@
    <tile gid="35"/>
    <tile gid="35"/>
    <tile gid="35"/>
-=======
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -33442,7 +33425,6 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-<<<<<<< HEAD
    <tile gid="35"/>
    <tile gid="33"/>
    <tile gid="51"/>
@@ -33451,16 +33433,6 @@
    <tile gid="52"/>
    <tile gid="34"/>
    <tile gid="35"/>
-=======
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -33703,7 +33675,6 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-<<<<<<< HEAD
    <tile gid="35"/>
    <tile gid="35"/>
    <tile gid="35"/>
@@ -33712,7 +33683,6 @@
    <tile gid="35"/>
    <tile gid="35"/>
    <tile gid="35"/>
-=======
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -33720,15 +33690,6 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="0"/>
->>>>>>> origin/master
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
    <tile gid="2"/>
    <tile gid="18"/>
    <tile gid="18"/>
@@ -40913,11 +40874,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -41167,11 +41124,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -41421,11 +41374,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -41675,11 +41624,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -41929,11 +41874,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -42183,11 +42124,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -42437,11 +42374,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -42691,11 +42624,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -42945,11 +42874,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -43198,13 +43123,8 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
    <tile gid="0"/>
-=======
-   <tile gid="2"/>
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -43453,11 +43373,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -43707,11 +43623,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -43961,11 +43873,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -44215,11 +44123,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -44469,11 +44373,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -44723,11 +44623,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -44977,11 +44873,7 @@
    <tile gid="18"/>
    <tile gid="18"/>
    <tile gid="18"/>
-<<<<<<< HEAD
    <tile gid="18"/>
-=======
-   <tile gid="2"/>
->>>>>>> origin/master
    <tile gid="2"/>
    <tile gid="2"/>
    <tile gid="2"/>
