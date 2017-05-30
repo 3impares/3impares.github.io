@@ -21,9 +21,14 @@ var game = function(){
 	//Q.debug = true;
 
 	Q.state.set({
+		health: 100,
 		shurikens:20,
 		weapon:"katana_sym.png"
 	});
+	Q.state.on("change.health, change.shurikens, change.weapon", function(){
+			Q.stageScene("HUD", 1, 
+				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
+				});
 
 
 	Q.load(["katana.png", "katana.json", "htt.png", "htt.json","cono.png","hattori.png",
@@ -84,7 +89,8 @@ var game = function(){
 				katana: 0,
 				first:true,
 				coldRoll:0,
-				shurikens:20
+				shurikens:20,
+				health: 100
 		});
 			var kat = this.p.katana;
 			
@@ -97,26 +103,26 @@ var game = function(){
 			this.play("stand");
 
 			Q.state.set("shurikens", this.p.shurikens);
-			Q.stageScene("HUD", 1, {weapon:{asset:"katana_sym.png"}});
+			Q.state.set("weapon", "katana_sym.png");
 		},
 		  
 		swordAttack: function(){
 			Q.state.set("weapon", "katana_sym.png");
-			Q.stageScene("HUD", 1, {weapon:{asset:"katana_sym.png"}});
 			this.p.attackType = true;
 		},
 		  
 		shurikenAttack: function(){
 			this.p.attackType = false;
 			Q.state.set("weapon", "shuriken_sym.png");
-			Q.stageScene("HUD", 1, {y: 200, weapon:{asset:"shuriken_sym.png"}});
 		},
+		
 		roll: function(){
 			if(this.p.coldRoll==0){
 				this.p.coldRoll=50;
 				this.animate({speed:800}, 0.2, {callback: function(){this.p.speed=400}});
 			}
 		},
+		
 		fire: function(evt){
 			var self = this;
 			var kat = this.kat.p;
@@ -146,15 +152,26 @@ var game = function(){
 					/*var dx = -this.p.w*this.p.scale-1;
 					var velx = -100;
 					if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}*/
-					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir}));
-					var self = this;
+					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, enemy: false}));
 					
-					this.p.shurikens--;
-					Q.state.set("shurikens", this.p.shurikens);
-					Q.stageScene("HUD", 1, {sh: {label: "Shurikens "+Q.state.get("shurikens")}});
+					Q.state.inc("shurikens", -1);
 				}
 			}
 		
+		},
+		
+		hurt: function(){
+			Q.state.inc("health", -10);
+			if(Q.state.get("health") <= 0){
+				this.die();
+			}
+		},
+		
+		die: function(){
+			this.destroy();
+			//aparece scene de fin de juego
+			//Q.stageScene("endGame", 2);
+			Q.stageScene("endGame", 2, {label: "You win this time..."});
 		},
 
      	trigonometry: function (x, y){
@@ -219,7 +236,7 @@ var game = function(){
 				state:0,
 				cono: 0,
 				first:true,
-				coldownAttack: 75,
+				coldownAttack: 100,
 				attackType: false	//true: meele; false: shooter
 			});
 			this.add('2d, animation, tween');
@@ -233,7 +250,7 @@ var game = function(){
 				if(collision.obj.isA("Hattori"))
 					this.p.state=1;
 				else
-					this.p.dir=(this.p.dir+90)%360;
+					this.p.dir = (this.p.dir+90)%360;
 			}
 		},
 		
@@ -246,7 +263,7 @@ var game = function(){
 			}
 		},
 		
-		fire: function(evt){
+		fire: function(){
 			/*var self = this;
 			var kat = this.kat.p;
 			if(this.p.attackType){ //sword attack
@@ -270,10 +287,9 @@ var game = function(){
 				}
 			}else{*/	//shuriken attack
 				if(this.p.coldownAttack==0 /*&& this.p.shurikens>0*/){
-					this.p.coldownAttack=75;
-					var mouse = getMouse(evt);
-					
-					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir}));
+					this.p.coldownAttack=100;
+					console.log("enemy attack you");
+					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, enemy: true}));
 					
 					//this.p.shurikens--;
 					//Q.state.set("shurikens", this.p.shurikens);
@@ -287,17 +303,12 @@ var game = function(){
 			this.p.cono.destroy();
 			this.destroy();
 		},
-		deprecated: function(evt){
-			if(this.p.state==0)
-				this.p.state=1;
-			else 
-				this.p.state=0;
-		},
+
 		trigonometry: function (x, y){
-			var cos=(x-this.p.x)/(this.p.x);
+			var cos = (x-this.p.x)/(this.p.x);
 			var sin=-(y-this.p.y)/(this.p.y);
 			
-			angle=(Math.atan(sin/cos)/(Math.PI/180));
+			angle = (Math.atan(sin/cos)/(Math.PI/180));
 			if(cos<0)
 				angle+=180;
 
@@ -309,30 +320,33 @@ var game = function(){
 				this.p.first=false;
 			}
 			this.play("stand");
-			this.p.angle=-this.p.dir-90;
+			this.p.angle = -this.p.dir-90;
 			var v;
-			if(this.p.state==1){ //alert mode
+			if(this.p.state == 1){ //alert mode
 				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
-				v=this.p.vel;
-				
-				if(this.p.coldownAttack > 0){		//los tiradores disparan cada cierto tiempo si te persiguen.
+				v = this.p.vel;
+								
+				if(this.p.coldownAttack){		//los tiradores disparan cada cierto tiempo si te persiguen.
 					this.p.coldownAttack --;		//los meeles atacaran si estás en su cono de visión.
 				}else{
 					this.fire();
 				}
-				
+				this.p.cono.p.opacity = 0.1;
 			}
-			else{
-				this.p.time+=dt*1000;
+			else{		//patrol mode
+				this.p.cono.p.opacity = 0.5;
+				this.p.time += dt*1000;
 				if(this.p.time>=this.p.patrolTime){
-					this.p.dir+=180;
+					this.p.dir += 180;
 					this.p.time=0;
 				}
-				v=this.p.patrol;
+				v = this.p.patrol;
 			}
-			this.p.vy=-v*Math.sin(this.p.dir*Math.PI/180);
-			this.p.vx=v*Math.cos(this.p.dir*Math.PI/180);
-			if(this.p.cono.p.alert>0)
+			
+			this.p.vy = -v*Math.sin(this.p.dir*Math.PI/180);
+			this.p.vx = v*Math.cos(this.p.dir*Math.PI/180);
+			
+			if(this.p.cono.p.alert > 0)
 				this.p.state = 1;
 			else
 				this.p.state = 0;
@@ -340,8 +354,8 @@ var game = function(){
 
 			this.p.cono.p.angle=this.p.angle;
 			
-			this.p.cono.p.x=this.p.x+(this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
-			this.p.cono.p.y=this.p.y-(this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
+			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
+			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
 			
 		}
 
@@ -361,8 +375,8 @@ var game = function(){
 				vy:0,
 				vx:0,
 				sensor: true,
-				scale:0.2
-				
+				scale:0.2,
+				enemy: false	//true: enemy shuriken; false: hattori shuriken
 			});
 			this.p.vy=-Q.height*Math.sin(this.p.dir*(Math.PI/180));
 			this.p.vx=Q.width*Math.cos(this.p.dir*(Math.PI/180));
@@ -371,22 +385,29 @@ var game = function(){
 			
 			this.add('2d, animation, tween');
 			this.on("hit",this,"hit");
-			//this.getFinal();
-		},
-		
-		getFinal: function(){
-			this.animate({x: this.p.objX, y: this.p.objY}, 1)
 		},
 		
 		hit: function(collision){
-			if(!collision.obj.isA("Hattori")){
-				
-				if(collision.obj.isA("Enemy")){
-					collision.obj.die();
+			if(!this.p.enemy){  //hattori throws it
+				if(!collision.obj.isA("Hattori")){
+					if(collision.obj.isA("Enemy")){
+						collision.obj.die();
+					}
+					if(!collision.obj.isA("Cono")){
+						this.destroy();
+					}
 				}
-				if(!collision.obj.isA("Cono"))
-					this.destroy();
+			}else{		//An enemy throws it
+				if(!collision.obj.isA("Enemy")){
+					if(collision.obj.isA("Hattori")){
+						collision.obj.hurt();
+					}
+					if(!collision.obj.isA("Cono")){
+						this.destroy();
+					}
+				}
 			}
+			
 		},
 		
 		step:function(dt){
@@ -426,7 +447,7 @@ var game = function(){
 	});
 	
 	
-
+/*
 	/////////////////////////////cursor////////////////////
 	Q.Sprite.extend("Cursor",{
 		init:function(p){
@@ -453,7 +474,7 @@ var game = function(){
 			
 		}
 
-	});
+	});*/
 	
 	/////////////////////////////---CONO---////////////////////
 	Q.Sprite.extend("Cono",{
@@ -471,37 +492,92 @@ var game = function(){
 		},
 		
 		hit: function(collision){
-			if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
+		
+			if(collision.obj.isA("Hattori") || (collision.obj.isA("Shuriken") && !collision.obj.p.enemy)){
 				this.p.alert = 300;
+				console.log(collision.obj.className);
 			}
-
 		},	
+		
 		step:function(dt){
-			//console.log(this.p.x+" "+this.p.y);
-			if(this.p.alert>0)
+			if(this.p.alert > 0)
 				this.p.alert--;
 		}
 	});
 	
+	//////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////   STAGES   //////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////
+	
+	
 	Q.scene("HUD",function(stage) {
-		var sh = new Q.UI.Text({x: Q.width/6, y: 20, label: "Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
+		var sh = new Q.UI.Text({x: Q.width/5, y: 20, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
   		stage.insert(sh);
 		var weapon = new Q.Sprite({x: Q.width/6, y: 100, asset: Q.state.get("weapon")});
 		stage.insert(weapon);
 
 	});
+	
+	Q.scene('endGame',function(stage) {
+		var box = stage.insert(new Q.UI.Container({
+			x: Q.width/2, y: Q.height/2, fill: "rgba(0,0,0,0.5)"
+		}));
+		
+		var txt = stage.options.label;
+		/*
+			if(!lost){ //lives >= 0
+				var button = box.insert(new Q.UI.Button({ x: 0, y: 0, fill: "#CCCCCC", label: "Play Again" }));
+				button.on("click",function() {
+					Q.clearStages();
+					
+					Q.state.set({coins: initCoins, score: initScore});
+					
+					Q.stageScene('HUD', 1);
+					Q.audio.stop("");
+					Q.audio.play("music_main.mp3",{ loop: true });
+				});
+			}else{
+				Q.audio.stop("");
+				Q.audio.play("music_game_over.mp3");
+			}
+		*/
+		var button2 = box.insert(new Q.UI.Button({ x: 0, y: 60, fill: "#CCCCCC",
+											   label: "Play Again" }));        
+		
+		var label = box.insert(new Q.UI.Text({cx: button2.width/2, y: -10 - button2.p.h, 
+											label: "Hattori dies. Try again!" }));
+											
+		button2.on("click", function() {
+			console.log("click on play again");
+			Q.clearStages();
+			Q.state.set({health: 100, shurikens: 20});
+			Q.state.on("change.health, change.shurikens, change.weapon", function(){
+				Q.stageScene("HUD", 1, 
+					{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
+					});
+			
+			Q.stageScene('level1', 0);
+			Q.stageScene('HUD', 1);
+		});
+		
+		
+		box.fit(20);
+	});
 
 
 
 	Q.loadTMX("mapa2.tmx",function() {
-		Q.stageScene("mapa1");
+		Q.stageScene("level1", 0);
+		Q.stageScene('HUD', 1);
 		//Q.debug = true;
 	});
 
 
 	// ## Level1 scene
 		// Create a new scene called level 1
-	Q.scene('mapa1', function(stage) {
+	Q.scene('level1', function(stage) {
 		Q.stageTMX("mapa2.tmx", stage);
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori());
@@ -518,6 +594,6 @@ var game = function(){
 
 		center.follow(hattori, {x:true, y:true});
 	});
-	Q.stageScene('level1', 0);
-    Q.stageScene('HUD', 1);
+	//Q.stageScene('level1', 0);
+    
 }
