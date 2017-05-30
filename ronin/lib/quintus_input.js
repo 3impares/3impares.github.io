@@ -68,7 +68,7 @@ Quintus.Input = function(Q) {
 	Q: 'shurikenAttack',
 	E: 'swordAttack',
 	R: 'roll',
-    SPACE: 'fire',
+    SPACE: 'roll',
     Z: 'fire',
     X: 'action',
     ENTER: 'confirm',

@@ -228,10 +228,12 @@ var game = function(){
 				x:1500,
 				y:500,
 				scale:0.5,
-				dir:270,
+				dir:-90,
 				time:0,
-				patrolTime:4000,
+				patrolTime:8000,
 				patrol:100,
+				v:0,
+				turning:false,
 				vel:300,
 				state:0,
 				cono: 0,
@@ -249,8 +251,12 @@ var game = function(){
 			if(this.p.state==0){
 				if(collision.obj.isA("Hattori"))
 					this.p.state=1;
-				else
-					this.p.dir = (this.p.dir+90)%360;
+				else{
+					var newDir=(this.p.dir+90)%360;
+					if(newDir-this.p.dir>180)
+						newDir=-newDir;
+					this.turn(newDir,0.5);
+				}
 			}
 		},
 		
@@ -258,8 +264,22 @@ var game = function(){
 			if(this.p.state==0){
 				if(collision.obj.isA("Hattori"))
 					this.p.state=1;
-				else
-					this.p.dir=-this.p.dir;
+				else{
+					var newDir=-this.p.dir;
+				//	if(newDir-this.p.dir<180)
+					//	newDir=360-newDir;
+					this.turn(newDir,0.5);
+				}
+			}
+		},
+		
+		turn:function(angle,time){
+			if(!this.p.turning){
+				var self=this;
+				this.p.v=0;
+				this.p.turning=true;
+				this.animate({dir: angle }, time, Q.Easing.Linear,{callback: function() {self.p.v = self.p.patrol;this.p.turning=false;} });
+				this.p.time=0;
 			}
 		},
 		
@@ -314,6 +334,16 @@ var game = function(){
 
 			return angle;
 		},
+		
+		distance: function(){
+			var x=this.p.x-hattori.p.x;
+			console.log("x: "+x);
+			var y=this.p.y-hattori.p.y;
+			console.log("y: "+y);
+			
+			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
+		},
+		
 		step: function(dt){
 			if(this.p.first){
 				this.p.cono = this.stage.insert(new Q.Cono());
@@ -321,10 +351,18 @@ var game = function(){
 			}
 			this.play("stand");
 			this.p.angle = -this.p.dir-90;
-			var v;
+
 			if(this.p.state == 1){ //alert mode
 				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
-				v = this.p.vel;
+				console.log(this.distance())
+				if(this.distance()<500){
+					this.p.v=0;
+					console.log("al lado")
+				}
+				else{
+					console.log("lejos")
+					this.p.v = this.p.vel;
+					}
 								
 				if(this.p.coldownAttack){		//los tiradores disparan cada cierto tiempo si te persiguen.
 					this.p.coldownAttack --;		//los meeles atacaran si estás en su cono de visión.
@@ -333,18 +371,18 @@ var game = function(){
 				}
 				this.p.cono.p.opacity = 0.1;
 			}
-			else{		//patrol mode
+			else if(!this.p.turning){		//patrol mode
 				this.p.cono.p.opacity = 0.5;
 				this.p.time += dt*1000;
+				this.p.v = this.p.patrol;
 				if(this.p.time>=this.p.patrolTime){
-					this.p.dir += 180;
-					this.p.time=0;
+					this.turn((this.p.dir+180)%360,1);
 				}
-				v = this.p.patrol;
+				
 			}
 			
-			this.p.vy = -v*Math.sin(this.p.dir*Math.PI/180);
-			this.p.vx = v*Math.cos(this.p.dir*Math.PI/180);
+			this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
+			this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
 			
 			if(this.p.cono.p.alert > 0)
 				this.p.state = 1;
