@@ -18,14 +18,15 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-	//Q.debug = true;
+	Q.debug = true;
 
 	Q.state.set({
 		health: 100,
 		shurikens:20,
-		weapon:"katana_sym.png"
+		weapon:"katana_sym.png",
+		state: 0
 	});
-	Q.state.on("change.health, change.shurikens, change.weapon", function(){
+	Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
@@ -33,7 +34,8 @@ var game = function(){
 
 	Q.load(["katana.png", "katana.json", "htt.png", "htt.json","cono.png","hattori.png",
 	 "hattori.json","shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json",
-	 "shuriken_sym.png", "shuriken_sym.json", "katana_sym.png", "katana_sym.json"], function(){
+	 "shuriken_sym.png", "shuriken_sym.json", "katana_sym.png", "katana_sym.json",
+	 "alert.png", "alert.json", "calm.png", "calm.json"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("htt.png", "htt.json");
 		Q.compileSheets("cursor.png", "cursor.json");
@@ -41,6 +43,8 @@ var game = function(){
 		Q.compileSheets("katana.png", "katana.json");
 		Q.compileSheets("katana_sym.png", "katana_sym.json");
 		Q.compileSheets("shuriken_sym.png", "shuriken_sym.json");
+		Q.compileSheets("alert.png", "alert.json");
+		Q.compileSheets("calm.png", "calm.json");
 	});
 
 	Q.animations("hattori_anim", {
@@ -90,7 +94,8 @@ var game = function(){
 				first:true,
 				coldRoll:0,
 				shurikens:20,
-				health: 100
+				health: 100,
+				enemies: 0
 		});
 			var kat = this.p.katana;
 			
@@ -104,6 +109,7 @@ var game = function(){
 
 			Q.state.set("shurikens", this.p.shurikens);
 			Q.state.set("weapon", "katana_sym.png");
+			Q.state.set("state", 0);
 		},
 		  
 		swordAttack: function(){
@@ -212,8 +218,9 @@ var game = function(){
 			
 			this.kat.p.x = this.p.x - ((this.p.w/4+this.kat.p.w*this.kat.p.scale/2) * Math.sin(this.p.dir*Math.PI/180));
 			this.kat.p.y = this.p.y - ((this.p.h/2+this.kat.p.w*this.kat.p.scale/2) * Math.cos(this.p.dir*Math.PI/180));
-			
+			console.log(this.p.enemies);		
 		}
+
 
 	});
 	
@@ -302,6 +309,10 @@ var game = function(){
 		die: function(){
 			this.p.cono.destroy();
 			this.destroy();
+			if(this.p.state==1){
+				hattori.p.enemies--;
+				Q.state.set("state", hattori.p.enemies);
+			}
 		},
 
 		trigonometry: function (x, y){
@@ -346,17 +357,27 @@ var game = function(){
 			this.p.vy = -v*Math.sin(this.p.dir*Math.PI/180);
 			this.p.vx = v*Math.cos(this.p.dir*Math.PI/180);
 			
-			if(this.p.cono.p.alert > 0)
+			if(this.p.cono.p.alert > 0){
+				if(this.p.state == 0)
+					hattori.p.enemies++;
 				this.p.state = 1;
-			else
-				this.p.state = 0;
+			}else{ 
+				if(this.p.state == 1)
+					hattori.p.enemies--;
 
+				this.p.state = 0;
+			}
+			
+			Q.state.set("state", hattori.p.enemies);
 
 			this.p.cono.p.angle=this.p.angle;
 			
 			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
 			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
 			
+
+
+			//gamestate
 		}
 
 	});
@@ -495,13 +516,14 @@ var game = function(){
 		
 			if(collision.obj.isA("Hattori") || (collision.obj.isA("Shuriken") && !collision.obj.p.enemy)){
 				this.p.alert = 300;
-				console.log(collision.obj.className);
+				//console.log(collision.obj.className);
 			}
 		},	
 		
 		step:function(dt){
 			if(this.p.alert > 0)
 				this.p.alert--;
+			
 		}
 	});
 	
@@ -514,9 +536,20 @@ var game = function(){
 	
 	Q.scene("HUD",function(stage) {
 		var sh = new Q.UI.Text({x: Q.width/5, y: 20, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
-  		stage.insert(sh);
-		var weapon = new Q.Sprite({x: Q.width/6, y: 100, asset: Q.state.get("weapon")});
-		stage.insert(weapon);
+  		var weapon = new Q.Sprite({x: Q.width/6, y: 100, asset: Q.state.get("weapon")});
+		
+		var box = stage.insert(new Q.UI.Container({x: Q.width/5, y: 20 , fill: "rgba(f,f,f,1)"}));
+
+		var alert;
+		if(Q.state.get("state")){
+			alert = new Q.Sprite({x: Q.width/6, y: 200, asset: "alert.png"});
+		}else{
+			alert = new Q.Sprite({x: Q.width/6, y: 200, asset: "calm.png"});
+		}
+
+		box.insert(sh);
+		box.insert(weapon);
+		box.insert(alert);
 
 	});
 	
@@ -526,23 +559,7 @@ var game = function(){
 		}));
 		
 		var txt = stage.options.label;
-		/*
-			if(!lost){ //lives >= 0
-				var button = box.insert(new Q.UI.Button({ x: 0, y: 0, fill: "#CCCCCC", label: "Play Again" }));
-				button.on("click",function() {
-					Q.clearStages();
-					
-					Q.state.set({coins: initCoins, score: initScore});
-					
-					Q.stageScene('HUD', 1);
-					Q.audio.stop("");
-					Q.audio.play("music_main.mp3",{ loop: true });
-				});
-			}else{
-				Q.audio.stop("");
-				Q.audio.play("music_game_over.mp3");
-			}
-		*/
+	
 		var button2 = box.insert(new Q.UI.Button({ x: 0, y: 60, fill: "#CCCCCC",
 											   label: "Play Again" }));        
 		
@@ -553,7 +570,7 @@ var game = function(){
 			console.log("click on play again");
 			Q.clearStages();
 			Q.state.set({health: 100, shurikens: 20});
-			Q.state.on("change.health, change.shurikens, change.weapon", function(){
+			Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
 				Q.stageScene("HUD", 1, 
 					{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 					});
