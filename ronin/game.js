@@ -78,7 +78,7 @@ var game = function(){
 				x:500,
 				y:500,
 				scale:0.5,
-				coldown:false,
+				coldownAttack: 50,
 				attackType: true,	//false = shuriken, true = sword
 				changing: false,
 				katana: 0,
@@ -121,8 +121,8 @@ var game = function(){
 			var self = this;
 			var kat = this.kat.p;
 			if(this.p.attackType){ //sword attack
-				if(this.p.coldown==0){
-					this.p.coldown=50;
+				if(this.p.coldownAttack==0){
+					this.p.coldownAttack=50;
 					kat.attacking = true;
 					this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
 					
@@ -140,10 +140,9 @@ var game = function(){
 							{ callback: function() { console.log("fin "); kat.attacking = false;} });
 				}
 			}else{	//shuriken attack
-				if(this.p.coldown==0 && this.p.shurikens>0){
-					this.p.coldown=50;
+				if(this.p.coldownAttack==0 && this.p.shurikens>0){
+					this.p.coldownAttack=50;
 					var mouse = getMouse(evt);
-					this.p.coldown = true;
 					/*var dx = -this.p.w*this.p.scale-1;
 					var velx = -100;
 					if(this.p.direction == "right"){ dx += this.p.w*this.p.scale*2+3; velx *= -1;}*/
@@ -188,8 +187,8 @@ var game = function(){
 				this.p.coldRoll--;
 			}
 	
-			if(this.p.coldown){
-				this.p.coldown--;
+			if(this.p.coldownAttack){
+				this.p.coldownAttack--;
 			}
 	
 			this.kat.p.angle = this.p.angle;
@@ -213,14 +212,15 @@ var game = function(){
 				y:500,
 				scale:0.5,
 				dir:270,
-				coldown:false,
 				time:0,
 				patrolTime:4000,
 				patrol:100,
 				vel:300,
 				state:0,
 				cono: 0,
-				first:true
+				first:true,
+				coldownAttack: 75,
+				attackType: false	//true: meele; false: shooter
 			});
 			this.add('2d, animation, tween');
 			this.on("bump.top, bump.bottom","collisiony");
@@ -246,11 +246,48 @@ var game = function(){
 			}
 		},
 		
+		fire: function(evt){
+			/*var self = this;
+			var kat = this.kat.p;
+			if(this.p.attackType){ //sword attack
+				if(this.p.coldownAttack==0){
+					this.p.coldownAttack=50;
+					kat.attacking = true;
+					this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
+					
+					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
+							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180)), 
+							angle: kat.angle+100}, 0.1, Q.Easing.Linear)
+					
+					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(150)*(Math.sin(this.p.dir*Math.PI/180))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
+							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180))+(150)*(Math.cos(this.p.dir*Math.PI/180)), 
+							angle: kat.angle+240}, 0.1, Q.Easing.Linear)
+					
+					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180))), 
+							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180))), 
+							angle: kat.angle}, 0.3, Q.Easing.Quadratic.Out, 
+							{ callback: function() { console.log("fin "); kat.attacking = false;} });
+				}
+			}else{*/	//shuriken attack
+				if(this.p.coldownAttack==0 /*&& this.p.shurikens>0*/){
+					this.p.coldownAttack=75;
+					var mouse = getMouse(evt);
+					
+					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir}));
+					
+					//this.p.shurikens--;
+					//Q.state.set("shurikens", this.p.shurikens);
+					//Q.stageScene("HUD", 1, {sh: {label: "Shurikens "+Q.state.get("shurikens")}});
+				}
+			//}
+		
+		},
+		
 		die: function(){
 			this.p.cono.destroy();
 			this.destroy();
 		},
-		fire: function(evt){
+		deprecated: function(evt){
 			if(this.p.state==0)
 				this.p.state=1;
 			else 
@@ -274,9 +311,16 @@ var game = function(){
 			this.play("stand");
 			this.p.angle=-this.p.dir-90;
 			var v;
-			if(this.p.state==1){
+			if(this.p.state==1){ //alert mode
 				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
 				v=this.p.vel;
+				
+				if(this.p.coldownAttack > 0){		//los tiradores disparan cada cierto tiempo si te persiguen.
+					this.p.coldownAttack --;		//los meeles atacaran si estás en su cono de visión.
+				}else{
+					this.fire();
+				}
+				
 			}
 			else{
 				this.p.time+=dt*1000;
