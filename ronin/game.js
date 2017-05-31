@@ -212,7 +212,6 @@ var game = function(){
 				this.kat.on("hit");
 			}else{
 				this.kat.p.opacity = 0;
-				this.kat.
 			}
 			
 			this.p.dir = this.trigonometry(mousex, mousey);
