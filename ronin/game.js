@@ -18,7 +18,7 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-	Q.debug = true;
+	//Q.debug = true;
 
 		 
 	var maxHealth = 100;
@@ -27,7 +27,7 @@ var game = function(){
 	Q.state.set({
 		health: maxHealth,
 		shurikens:maxShurikens,
-		weapon:"katana_sym.png",
+		weapon:"leonard-katana.png",
 		state: 0
 	});
 	Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
@@ -40,7 +40,8 @@ var game = function(){
 	Q.load(["katana.png", "katana.json", "htt.png", "htt.json", "cono.png", "hattori.png",
 				 "hattori.json", "shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json",
 				 "shuriken_sym.png", "shuriken_sym.json", "katana_sym.png", "katana_sym.json", "shurikenEnemy.png",
-				 "health-potion.png", "bag.png", "kumo-jailed.png", "calm.png", "alert.png"], function(){
+				 "health-potion.png", "bag.png", "kumo-jailed.png", "calm.png", "alert.png", "leonard-katana.png",
+				 "shuriken.png"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("htt.png", "htt.json");
 		Q.compileSheets("cursor.png", "cursor.json");
@@ -118,13 +119,13 @@ var game = function(){
 		},
 		  
 		swordAttack: function(){
-			Q.state.set("weapon", "katana_sym.png");
+			Q.state.set("weapon", "leonard-katana.png");
 			this.p.attackType = true;
 		},
 		  
 		shurikenAttack: function(){
 			this.p.attackType = false;
-			Q.state.set("weapon", "shuriken_sym.png");
+			Q.state.set("weapon", "shuriken.png");
 		},
 		
 		roll: function(){
@@ -695,16 +696,16 @@ var game = function(){
 	
 	
 	Q.scene("HUD",function(stage) {
-		var sh = new Q.UI.Text({x: Q.width/5, y: 20, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
-  		var weapon = new Q.Sprite({x: Q.width/6, y: 100, asset: Q.state.get("weapon")});
+		var sh = new Q.UI.Text({x: 100, y: 20, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
+  		var weapon = new Q.Sprite({scale:0.4, x: 100, y: 150, asset: Q.state.get("weapon")});
 		
-		var box = stage.insert(new Q.UI.Container({x: Q.width/5, y: 20 , fill: "rgba(f,f,f,1)"}));
+		var box = stage.insert(new Q.UI.Container({x: 100, y: 20 , fill: "rgba(f,f,f,0)"}));
 
 		var alert;
 		if(Q.state.get("state")){
-			alert = new Q.Sprite({x: Q.width/6, y: 200, asset: "alert.png"});
+			alert = new Q.Sprite({x: 100, y: 200, asset: "alert.png"});
 		}else{
-			alert = new Q.Sprite({x: Q.width/6, y: 200, asset: "calm.png"});
+			alert = new Q.Sprite({x: 100, y: 200, asset: "calm.png"});
 		}
 
 		box.insert(sh);
