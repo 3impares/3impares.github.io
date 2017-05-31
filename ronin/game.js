@@ -289,7 +289,7 @@ var game = function(){
 		
 		collisiony:function(collision){
 			if(this.p.state==0){
-				if(collision.obj.isA("Hattori")||collision.obj.isA("Shuriken"))
+				if(collision.obj.isA("Hattori")||collision.obj.isA("Shuriken")){
 					this.p.state=1;
 					Q.state.inc("enemies", 1);
 					checkState();
