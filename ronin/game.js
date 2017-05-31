@@ -28,9 +28,10 @@ var game = function(){
 
 	Q.state.set({
 		health: maxHealth,
-		shurikens:maxShurikens,
-		weapon:"leonard-katana.png",
-		state: 0
+		shurikens: maxShurikens,
+		weapon: "leonard-katana.png",
+		enemies: 0,
+		state: false
 	});
 	Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
 			Q.stageScene("HUD", 1, 
@@ -208,12 +209,14 @@ var game = function(){
 			}
 			if(this.kat.p.attacking){
 				this.kat.p.opacity = 1;
+				this.kat.on("hit");
 			}else{
 				this.kat.p.opacity = 0;
+				this.kat.
 			}
 			
 			this.p.dir = this.trigonometry(mousex, mousey);
-			this.p.angle=-this.p.dir-90;
+			this.p.angle = -this.p.dir-90;
 			originX = this.p.x;
 			originY = this.p.y;
 
@@ -270,9 +273,11 @@ var game = function(){
 		
 		collisionx:function(collision){
 			if(this.p.state==0){
-				if(collision.obj.isA("Hattori"))
+				if(collision.obj.isA("Hattori")){
 					this.p.state=1;
-				else{
+					Q.state.inc("enemies", 1);
+					checkState();
+				}else{
 					var newDir=(this.p.dir+90)%360;
 					if(newDir-this.p.dir>180)
 						newDir=-newDir;
@@ -283,9 +288,11 @@ var game = function(){
 		
 		collisiony:function(collision){
 			if(this.p.state==0){
-				if(collision.obj.isA("Hattori"))
+				if(collision.obj.isA("Hattori")){
 					this.p.state=1;
-				else{
+					Q.state.inc("enemies", 1);
+					checkState();
+				}else{
 					var newDir=-this.p.dir;
 				//	if(newDir-this.p.dir<180)
 					//	newDir=360-newDir;
@@ -348,18 +355,20 @@ var game = function(){
 			this.p.cono.destroy();
 			this.destroy();
 			if(this.p.state==1){
-				hattori.p.enemies--;
-				Q.state.set("state", hattori.p.enemies);
+				Q.state.inc("enemies", -1);
+				checkState();
+				//hattori.p.enemies--;
+				//Q.state.set("state", hattori.p.enemies);
 			}
 		},
 
 		trigonometry: function (x, y){
 			var cos = (x-this.p.x)/(this.p.x);
-			var sin=-(y-this.p.y)/(this.p.y);
+			var sin = -(y-this.p.y)/(this.p.y);
 			
 			angle = (Math.atan(sin/cos)/(Math.PI/180));
 			if(cos<0)
-				angle+=180;
+				angle += 180;
 
 			return angle;
 		},
@@ -384,13 +393,10 @@ var game = function(){
 
 			if(this.p.state == 1){ //alert mode
 				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
-				console.log(this.distance())
 				if(this.distance()<500){
 					this.p.v=0;
-					console.log("al lado")
 				}
 				else{
-					console.log("lejos")
 					this.p.v = this.p.vel;
 					}
 								
@@ -416,23 +422,27 @@ var game = function(){
 			
 			if(this.p.cono.p.alert > 0){
 				if(this.p.state == 0){
-					hattori.p.enemies++;
-					this.p.cono.p.asset="cono_grande.png";
+					//hattori.p.enemies++;
+					this.p.cono.p.asset = "cono_grande.png";
 					this.p.cono.size(true);
+					Q.state.inc("enemies", 1);
+					checkState();
 				}
 				this.p.state = 1;
-			}else{ 
+			}else if(this.p.cono.p.alert <= 0){ 
 				if(this.p.state == 1){
-					hattori.p.enemies--;
+					//hattori.p.enemies--;
 					this.p.cono.p.asset="cono.png";
+					Q.state.inc("enemies", -1);
+					checkState();
 				}
 
 				this.p.state = 0;
 			}
 			
-			Q.state.set("state", hattori.p.enemies);
+			//Q.state.set("state", hattori.p.enemies);
 
-			this.p.cono.p.angle=this.p.angle;
+			this.p.cono.p.angle = this.p.angle;
 			
 			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
 			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
@@ -443,6 +453,14 @@ var game = function(){
 		}
 
 	});
+	
+	function checkState(){
+		if(Q.state.get("enemies") != 0){
+			Q.state.set("state", true);
+		}else{
+			Q.state.set("state", false);
+		}
+	}
 
 	Q.animations('enemy anim', {
 		stand: { frames: [0], rate: 1 }
