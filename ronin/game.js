@@ -247,10 +247,10 @@ var game = function(){
 			this._super(p, {
 				sheet: "enemy",
 				sprite: "enemy anim",
-				x:1500,
+				x:1000,
 				y:500,
 				scale:0.5,
-				dir:-90,
+				dir:130,
 				time:0,
 				patrolTime:8000,
 				patrol:100,
@@ -272,14 +272,16 @@ var game = function(){
 		
 		collisionx:function(collision){
 			if(this.p.state==0){
-				if(collision.obj.isA("Hattori")){
+				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
 					this.p.state=1;
 					Q.state.inc("enemies", 1);
 					checkState();
 				}else{
-					var newDir=(this.p.dir+90)%360;
-					if(newDir-this.p.dir>180)
-						newDir=-newDir;
+					var newDir=180-this.p.dir;
+					if(this.p.dir-newDir>180)
+						newDir+=360;
+					else if(this.p.dir-newDir<-180)
+						newDir-=360;
 					this.turn(newDir,0.5);
 				}
 			}
@@ -287,14 +289,16 @@ var game = function(){
 		
 		collisiony:function(collision){
 			if(this.p.state==0){
-				if(collision.obj.isA("Hattori")){
+				if(collision.obj.isA("Hattori")||collision.obj.isA("Shuriken"))
 					this.p.state=1;
 					Q.state.inc("enemies", 1);
 					checkState();
 				}else{
-					var newDir=-this.p.dir;
-				//	if(newDir-this.p.dir<180)
-					//	newDir=360-newDir;
+					var newDir=360-this.p.dir;
+					if(this.p.dir-newDir>180)
+						newDir+=360;
+					else if(this.p.dir-newDir<-180)
+						newDir-=360;
 					this.turn(newDir,0.5);
 				}
 			}
@@ -305,7 +309,10 @@ var game = function(){
 				var self=this;
 				this.p.v=0;
 				this.p.turning=true;
-				this.animate({dir: angle }, time, Q.Easing.Linear,{callback: function() {self.p.v = self.p.patrol;this.p.turning=false;} });
+				this.animate({dir: angle }, time, Q.Easing.Linear,{
+				callback: function() {if(self.p.dir>360)self.p.dir-=360;
+										else if(self.p.dir<0)self.p.dir+=360;
+										self.p.v = self.p.patrol;this.p.turning=false;} });
 				this.p.time=0;
 			}
 		},
@@ -335,7 +342,6 @@ var game = function(){
 			}else{*/	//shuriken attack
 				if(this.p.coldownAttack==0 /*&& this.p.shurikens>0*/){
 					this.p.coldownAttack=100;
-					console.log("enemy attack you");
 					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, shooter: this.className, asset: "shurikenEnemy.png"}));
 					
 				}
@@ -397,7 +403,7 @@ var game = function(){
 				}
 				else{
 					this.p.v = this.p.vel;
-					}
+				}
 								
 				if(this.p.coldownAttack){		//los tiradores disparan cada cierto tiempo si te persiguen.
 					this.p.coldownAttack --;		//los meeles atacaran si estás en su cono de visión.
@@ -411,7 +417,7 @@ var game = function(){
 				this.p.time += dt*1000;
 				this.p.v = this.p.patrol;
 				if(this.p.time>=this.p.patrolTime){
-					this.turn((this.p.dir+180)%360,1);
+					this.turn((this.p.dir+180),1);
 				}
 				
 			}
@@ -525,7 +531,7 @@ var game = function(){
 					if(collision.obj.isA("Enemy")){
 						collision.obj.hurt();
 					}
-					if(!collision.obj.isA("Cono")){
+					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
 						this.destroy();
 					}
 				}
@@ -534,7 +540,7 @@ var game = function(){
 					if(collision.obj.isA("Hattori")){
 						collision.obj.hurt();
 					}
-					if(!collision.obj.isA("Cono")){
+					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
 						this.destroy();
 					}
 				}
@@ -542,10 +548,8 @@ var game = function(){
 			
 		},
 		
-		step:function(dt){
-			
-			//this.animate({angle: 45});
-		}
+		step:function(dt){}
+		
 	});
 	
 	
@@ -567,6 +571,7 @@ var game = function(){
 			this.size(true);
 			this.on("hit",this,"hit");
 		},
+		
 		hit: function(collision){
 			if(this.p.attacking && !this.p.finAttack){
 				if(!collision.obj.isA("Hattori")){
@@ -577,9 +582,9 @@ var game = function(){
 				}
 			}
 		},
-		step:function(){
-			
-		}
+		
+		step:function(){}
+		
 	});
 	
 	
@@ -704,7 +709,6 @@ var game = function(){
 		},
 		
 		hit: function(collision){
-		
 			if(collision.obj.isA("Hattori") || (collision.obj.isA("Shuriken") && !collision.obj.p.enemy)){
 				this.p.alert = 300;
 				//console.log(collision.obj.className);
@@ -714,8 +718,8 @@ var game = function(){
 		step:function(dt){
 			if(this.p.alert > 0)
 				this.p.alert--;
-			
 		}
+		
 	});
 	
 	
