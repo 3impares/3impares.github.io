@@ -18,7 +18,7 @@ var game = function(){
 		 // And turn on default input controls and touch input (for UI)
 		 .controls().touch().enableSound();
 
-	Q.debug = true;
+	Q.debug = false;
 
 		 
 	var maxHealth = 100;
@@ -123,8 +123,13 @@ var game = function(){
 		},
 		  
 		shurikenAttack: function(){
-			this.p.attackType = false;
-			Q.state.set("weapon", "shuriken_sym.png");
+			//if(this.p.attackType){
+				this.p.attackType = false;
+				Q.state.set("weapon", "shuriken_sym.png");
+			/*}else{
+				this.p.attackType = true;
+				Q.state.set("weapon", "katana_sym.png");
+			}*/
 		},
 		
 		roll: function(){
@@ -154,7 +159,7 @@ var game = function(){
 					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180))), 
 							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180))), 
 							angle: kat.angle}, 0.3, Q.Easing.Quadratic.Out, 
-							{ callback: function() { console.log("fin "); kat.attacking = false;} });
+							{ callback: function() { console.log("fin "); kat.attacking = false; kat.finAttack = false;} });
 				}
 			}else{	//shuriken attack
 				if(this.p.coldownAttack==0 && Q.state.get("shurikens")>0){
@@ -178,6 +183,7 @@ var game = function(){
 		
 		die: function(){
 			this.destroy();
+			this.kat.destroy();
 			//aparece scene de fin de juego
 			Q.stageScene("endGame", 2, {label: "Hattori dies. Try again!"});
 		},
@@ -254,8 +260,8 @@ var game = function(){
 				attackType: false	//true: meele; false: shooter
 			});
 			this.add('2d, animation, tween');
-			this.on("bump.top, bump.bottom","collisiony");
-		 	this.on("bump.right, bump.left","collisionx");
+			this.on("bump.top, bump.bottom", "collisiony");
+		 	this.on("bump.right, bump.left", "collisionx");
 		 	
 		},
 		
@@ -518,7 +524,7 @@ var game = function(){
 	});
 	
 	
-	////////////////////////////Katana//////////////////////
+	//////////////////////////// Katana //////////////////////
 	
 	Q.Sprite.extend("Katana",{
 		init:function(p){
@@ -527,7 +533,8 @@ var game = function(){
 				asset:"katana.png",
 				sensor: true,
 				scale:0.1,
-				attacking: false
+				attacking: false,
+				finAttack: false
 			});
 			this.p.cy = 0;
 			this.p.cx = this.p.w/2;
@@ -536,10 +543,11 @@ var game = function(){
 			this.on("hit",this,"hit");
 		},
 		hit: function(collision){
-			if(this.p.attacking){
+			if(this.p.attacking && !this.p.finAttack){
 				if(!collision.obj.isA("Hattori")){
 					if(collision.obj.isA("Enemy")){
 						collision.obj.hurt();
+						this.p.finAttack = true;
 					}
 				}
 			}
@@ -767,6 +775,14 @@ var game = function(){
 		
 		var enemy = stage.insert(new Q.Enemy({}));
 		var enemy2 = stage.insert(new Q.Enemy({x:700, y:2000, scale: 1, health: 60}));
+		var enemy3 = stage.insert(new Q.Enemy({x:2800, y:800}));
+		var enemy4 = stage.insert(new Q.Enemy({x:3600, y:700, dir: 0}));
+		var enemy5 = stage.insert(new Q.Enemy({x:3600, y:2500}));
+		var enemy6 = stage.insert(new Q.Enemy({x:3600, y:1500, dir: 0}));
+		var enemy7 = stage.insert(new Q.Enemy({x:5600, y:700}));
+		var enemy8 = stage.insert(new Q.Enemy({x:6600, y:700}));
+		var enemy9 = stage.insert(new Q.Enemy({x:6400, y:1700}));
+		var enemy10 = stage.insert(new Q.Enemy({x:6400, y:2700}));
 		
 		center.follow(hattori, {x:true, y:true});
 	});
