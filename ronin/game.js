@@ -21,6 +21,7 @@ var game = function(){
 	//Q.debug = true;
 	Q.debug = false;
 
+	var idEnemy = 0;
 
 		 
 	var maxHealth = 100;
@@ -259,11 +260,13 @@ var game = function(){
 				vel:300,
 				state:0,
 				cono: 0,
+				id: "Enemy"+idEnemy,
 				first:true,
 				coldownAttack: 100,
 				health: 30,
 				attackType: false	//true: meele; false: shooter
 			});
+			idEnemy++;
 			this.add('2d, animation, tween');
 			this.on("bump.top, bump.bottom", "collisiony");
 		 	this.on("bump.right, bump.left", "collisionx");
@@ -271,34 +274,36 @@ var game = function(){
 		},
 		
 		collisionx:function(collision){
-			if(this.p.state==0){
+			if(this.p.state == 0){
 				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
-					this.p.state=1;
+					console.log("Me ha pinchado un shuriken!");
+					this.p.state = 1;
 					Q.state.inc("enemies", 1);
 					checkState();
 				}else{
-					var newDir=180-this.p.dir;
-					if(this.p.dir-newDir>180)
-						newDir+=360;
-					else if(this.p.dir-newDir<-180)
-						newDir-=360;
+					var newDir = 180-this.p.dir;
+					if(this.p.dir-newDir > 180)
+						newDir += 360;
+					else if(this.p.dir-newDir < -180)
+						newDir -= 360;
 					this.turn(newDir,0.5);
 				}
 			}
 		},
 		
 		collisiony:function(collision){
-			if(this.p.state==0){
-				if(collision.obj.isA("Hattori")||collision.obj.isA("Shuriken")){
-					this.p.state=1;
+			if(this.p.state == 0){
+				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
+					console.log("Me ha pinchado un shuriken!");
+					this.p.state = 1;
 					Q.state.inc("enemies", 1);
 					checkState();
 				}else{
-					var newDir=360-this.p.dir;
-					if(this.p.dir-newDir>180)
-						newDir+=360;
-					else if(this.p.dir-newDir<-180)
-						newDir-=360;
+					var newDir = 360-this.p.dir;
+					if(this.p.dir-newDir > 180)
+						newDir += 360;
+					else if(this.p.dir-newDir < -180)
+						newDir -= 360;
 					this.turn(newDir,0.5);
 				}
 			}
@@ -342,7 +347,7 @@ var game = function(){
 			}else{*/	//shuriken attack
 				if(this.p.coldownAttack==0 /*&& this.p.shurikens>0*/){
 					this.p.coldownAttack=100;
-					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, shooter: this.className, asset: "shurikenEnemy.png"}));
+					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, shooter: this.p.id, asset: "shurikenEnemy.png"}));
 					
 				}
 			//}
@@ -380,9 +385,9 @@ var game = function(){
 		
 		distance: function(){
 			var x=this.p.x-hattori.p.x;
-			console.log("x: "+x);
+			//console.log("x: "+x);
 			var y=this.p.y-hattori.p.y;
-			console.log("y: "+y);
+			//console.log("y: "+y);
 			
 			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
 		},
@@ -516,10 +521,10 @@ var game = function(){
 				scale:0.2,
 				shooter: ""
 			});
-			this.p.vy=-Q.height*Math.sin(this.p.dir*(Math.PI/180));
-			this.p.vx=Q.width*Math.cos(this.p.dir*(Math.PI/180));
-			this.p.y+=-30*Math.sin(this.p.dir*(Math.PI/180));
-			this.p.x+=30*Math.cos(this.p.dir*(Math.PI/180));
+			this.p.vy = -Q.height*Math.sin(this.p.dir*(Math.PI/180));
+			this.p.vx = Q.width*Math.cos(this.p.dir*(Math.PI/180));
+			this.p.y += -30*Math.sin(this.p.dir*(Math.PI/180));
+			this.p.x += 30*Math.cos(this.p.dir*(Math.PI/180));
 			
 			this.add('2d, animation, tween');
 			this.on("hit",this,"hit");
@@ -535,12 +540,19 @@ var game = function(){
 						this.destroy();
 					}
 				}
-			}else{		//An enemy throws it
-				if(!collision.obj.isA("Enemy")){
+			}else{
+				if(collision.obj.isA("Enemy") && this.p.shooter != collision.obj.p.id){
+					console.log("es un enemy y no coincide el id. Fuego amigo!");
+					collision.obj.hurt();
+					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
+						this.destroy();
+					}
+				}else{
 					if(collision.obj.isA("Hattori")){
 						collision.obj.hurt();
 					}
-					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
+					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking) 
+							&& !(collision.obj.isA("Enemy") && this.p.shooter == collision.obj.p.id)){
 						this.destroy();
 					}
 				}
