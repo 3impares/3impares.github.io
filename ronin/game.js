@@ -24,7 +24,7 @@ var game = function(){
 	var idEnemy = 0;
 
 		 
-	var maxHealth = 10;
+	var maxHealth = 1000;
 	var maxShurikens = 20;
 
 	Q.state.set({
@@ -44,8 +44,8 @@ var game = function(){
 	Q.load(["katana.png", "katana.json", "htt.png", "htt.json", "cono_grande.png", "cono.png", "hattori.png",
 				 "hattori.json", "shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json",
 				 "shuriken_sym.png", "shuriken_sym.json", "katana_sym.png", "katana_sym.json", "shurikenEnemy.png",
-				 "health-potion.png", "bag.png", "kumo-jailed.png", "calm.png", "alert.png", "leonard-katana.png",
-				 "sh.png", "city.jpg"], function(){
+				 "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", "calm.png", "alert.png", "leonard-katana.png",
+				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("htt.png", "htt.json");
 		Q.compileSheets("cursor.png", "cursor.json");
@@ -210,7 +210,6 @@ var game = function(){
 			}
 			if(this.kat.p.attacking){
 				this.kat.p.opacity = 1;
-				this.kat.on("hit");
 			}else{
 				this.kat.p.opacity = 0;
 			}
@@ -243,7 +242,10 @@ var game = function(){
 	///////////////////////      ENEMY       ///////////////////////////
 	////////////////////////////////////////////////////////////////////
 	
-	Q.Sprite.extend("Enemy", {
+	//------------DEFAULT ENEMY
+
+	Q.Sprite.extend('Enemy', {
+		
 		init: function(p){
 			this._super(p, {
 				sheet: "enemy",
@@ -257,26 +259,25 @@ var game = function(){
 				patrol:100,
 				v:0,
 				turning:false,
-				vel:300,
-				state:0,
+				vel: 300,
+				state: 0,
 				cono: 0,
-				id: "Enemy"+idEnemy,
-				first:true,
 				coldownAttack: 100,
 				health: 30,
-				attackType: false	//true: meele; false: shooter
+				id: "Enemy"+idEnemy,
+				first:true
 			});
+			
 			idEnemy++;
 			this.add('2d, animation, tween');
+			
 			this.on("bump.top, bump.bottom", "collisiony");
 		 	this.on("bump.right, bump.left", "collisionx");
-		 	
 		},
-		
+	
 		collisionx:function(collision){
 			if(this.p.state == 0){
 				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
-					console.log("Me ha pinchado un shuriken!");
 					this.p.state = 1;
 					Q.state.inc("enemies", 1);
 					checkState();
@@ -294,7 +295,6 @@ var game = function(){
 		collisiony:function(collision){
 			if(this.p.state == 0){
 				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
-					console.log("Me ha pinchado un shuriken!");
 					this.p.state = 1;
 					Q.state.inc("enemies", 1);
 					checkState();
@@ -315,48 +315,33 @@ var game = function(){
 				this.p.v=0;
 				this.p.turning=true;
 				this.animate({dir: angle }, time, Q.Easing.Linear,{
-				callback: function() {if(self.p.dir>360)self.p.dir-=360;
+								callback: function() {if(self.p.dir>360)self.p.dir-=360;
 										else if(self.p.dir<0)self.p.dir+=360;
-										self.p.v = self.p.patrol;this.p.turning=false;} });
+										self.p.v = self.p.patrol;this.p.turning=false;} 
+				});
 				this.p.time=0;
 			}
 		},
-		
-		fire: function(){
-			/*var self = this;
-			var kat = this.kat.p;
-			if(this.p.attackType){ //sword attack
-				if(this.p.coldownAttack==0){
-					this.p.coldownAttack=50;
-					kat.attacking = true;
-					this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
-					
-					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
-							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180)), 
-							angle: kat.angle+100}, 0.1, Q.Easing.Linear)
-					
-					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(150)*(Math.sin(this.p.dir*Math.PI/180))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
-							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180))+(150)*(Math.cos(this.p.dir*Math.PI/180)), 
-							angle: kat.angle+240}, 0.1, Q.Easing.Linear)
-					
-					.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180))), 
-							y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180))), 
-							angle: kat.angle}, 0.3, Q.Easing.Quadratic.Out, 
-							{ callback: function() { console.log("fin "); kat.attacking = false;} });
-				}
-			}else{*/	//shuriken attack
-				if(this.p.coldownAttack==0 /*&& this.p.shurikens>0*/){
-					this.p.coldownAttack=100;
-					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, shooter: this.p.id, asset: "shurikenEnemy.png"}));
-					
-				}
-			//}
-		
+				
+		distance: function(){
+			var x = this.p.x-hattori.p.x;
+			var y = this.p.y-hattori.p.y;
+			
+			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
 		},
 		
 		hurt: function(){
+			if(this.p.state == 0){
+				this.p.cono.p.asset = "cono_grande.png";
+				this.p.cono.size(true);
+				Q._generatePoints(this.p.cono,true);
+				Q.state.inc("enemies", 1);
+				checkState();
+			}
+		
 			this.p.state = 1;
 			this.p.health -= 10;
+
 			if(this.p.health <= 0){
 				this.die();
 			}
@@ -368,32 +353,42 @@ var game = function(){
 			if(this.p.state==1){
 				Q.state.inc("enemies", -1);
 				checkState();
-				//hattori.p.enemies--;
-				//Q.state.set("state", hattori.p.enemies);
 			}
 		},
-
+		
 		trigonometry: function (x, y){
-			var cos = (x-this.p.x)/(this.p.x);
-			var sin = -(y-this.p.y)/(this.p.y);
+			var cos = (x-this.p.x)/(Q.width/2);
+			var sin = -(y-this.p.y)/(Q.height/2);
 			
-			angle = (Math.atan(sin/cos)/(Math.PI/180));
+			var angle = (Math.atan(sin/cos)/(Math.PI/180));
 			if(cos<0)
 				angle += 180;
 
 			return angle;
-		},
+		}
 		
-		distance: function(){
-			var x=this.p.x-hattori.p.x;
-			//console.log("x: "+x);
-			var y=this.p.y-hattori.p.y;
-			//console.log("y: "+y);
-			
-			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
-		},
-		
+	});
+	
+	//------------SHOOTER ENEMY
+	
+	Q.Enemy.extend("Shooter", {
 
+		init: function(p){
+			this._super(p, {
+				vel:300,
+				coldownAttack: 100,
+				health: 30
+			});
+		},
+		
+		fire: function(){
+			if(this.p.coldownAttack <= 0 /*&& this.p.shurikens>0*/){
+				this.p.coldownAttack = 100;
+				var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, shooter: this.p.id, asset: "shurikenEnemy.png"}));
+				
+			}
+		},
+		
 		step: function(dt){
 			if(this.p.first){
 				this.p.cono = this.stage.insert(new Q.Cono());
@@ -410,7 +405,7 @@ var game = function(){
 				else{
 					this.p.v = this.p.vel;
 				}
-								
+				
 				if(this.p.coldownAttack){		//los tiradores disparan cada cierto tiempo si te persiguen.
 					this.p.coldownAttack --;		//los meeles atacaran si estás en su cono de visión.
 				}else{
@@ -433,17 +428,145 @@ var game = function(){
 			
 			if(this.p.cono.p.alert > 0){
 				if(this.p.state == 0){
-					//hattori.p.enemies++;
 					this.p.cono.p.asset = "cono_grande.png";
 					this.p.cono.size(true);
+					Q._generatePoints(this.p.cono,true);
 					Q.state.inc("enemies", 1);
 					checkState();
 				}
 				this.p.state = 1;
 			}else if(this.p.cono.p.alert <= 0){ 
 				if(this.p.state == 1){
-					//hattori.p.enemies--;
 					this.p.cono.p.asset="cono.png";
+					this.p.cono.size(true);
+					Q._generatePoints(this.p.cono,true);
+					Q.state.inc("enemies", -1);
+					checkState();
+				}
+
+				this.p.state = 0;
+			}
+
+			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
+			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
+			
+			this.p.cono.changeDir(this.p.angle);
+
+			//gamestate
+		}
+
+	});
+	
+	//------------MELEE ENEMY
+	
+	Q.Enemy.extend("Melee", {
+		init: function(p){
+			this._super(p, {
+				vel:400,
+				coldownAttack: 150,
+				health: 50,
+				katana: 0
+			});
+			
+			var kat = this.p.katana;
+		},
+		
+		die: function(){
+			this.p.cono.destroy();
+			this.kat.destroy();
+			this.destroy();
+			if(this.p.state==1){
+				Q.state.inc("enemies", -1);
+				checkState();
+			}
+		},
+		
+		fire: function(){
+			var self = this;
+			var kat = this.kat.p;
+			
+			if(this.p.coldownAttack<=0){
+				this.p.coldownAttack=150;
+				kat.attacking = true;
+				console.log("attack");
+				this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
+				
+				.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
+						y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180)), 
+						angle: kat.angle+100}, 0.1, Q.Easing.Linear)
+				
+				.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(150)*(Math.sin(this.p.dir*Math.PI/180))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
+						y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180)))-(70)*(Math.sin(this.p.dir*Math.PI/180))+(150)*(Math.cos(this.p.dir*Math.PI/180)), 
+						angle: kat.angle+240}, 0.1, Q.Easing.Linear)
+				
+				.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180))), 
+						y: (this.p.y - ((this.p.h/2+kat.w*kat.scale/2) * Math.cos(this.p.dir*Math.PI/180))), 
+						angle: kat.angle}, 0.3, Q.Easing.Quadratic.Out, 
+						{ callback: function() {kat.attacking = false; kat.finAttack = false;} });
+			}
+		
+		},
+		
+		step: function(dt){
+			if(this.p.first){
+				this.kat = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir, owner: this.p.id}));
+				this.p.cono = this.stage.insert(new Q.Cono());
+				this.p.first=false;
+			}
+			if(this.kat.p.attacking){
+				this.kat.p.opacity = 1;
+			}else{
+				this.kat.p.opacity = 1;
+			}
+			
+			this.play("stand");
+			this.p.angle = -this.p.dir-90;
+
+			if(this.p.state == 1){ //alert mode
+				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
+				if(this.distance() < hattori.p.h){
+					this.p.v = 0;
+					if(this.p.coldownAttack){
+						this.p.coldownAttack --;
+					}else{
+						this.fire();
+					}
+				}
+				else{
+					this.p.v = this.p.vel;
+				}
+
+				this.p.cono.p.opacity = 0.1;
+			}
+			else if(!this.p.turning){		//patrol mode
+				this.p.cono.p.opacity = 0.5;
+				this.p.time += dt*1000;
+				this.p.v = this.p.patrol;
+				if(this.p.time>=this.p.patrolTime){
+					this.turn((this.p.dir+180),1);
+				}	
+			}
+			if(this.p.coldownAttack){
+				this.p.coldownAttack --;
+			}
+			
+			this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
+			this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
+			
+			if(this.p.cono.p.alert > 0){
+				if(this.p.state == 0){
+					this.p.cono.p.asset = "cono_grande.png";
+					this.p.cono.size(true);
+					Q._generatePoints(this.p.cono,true);
+					Q.state.inc("enemies", 1);
+					checkState();
+				}
+				this.p.state = 1;
+			}else if(this.p.cono.p.alert <= 0){ 
+				if(this.p.state == 1){
+					this.p.cono.p.asset="cono.png";
+					this.p.cono.size(true);
+					Q._generatePoints(this.p.cono,true);
 					Q.state.inc("enemies", -1);
 					checkState();
 				}
@@ -451,14 +574,15 @@ var game = function(){
 				this.p.state = 0;
 			}
 			
-			//Q.state.set("state", hattori.p.enemies);
-
-			this.p.cono.p.angle = this.p.angle;
-			
 			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
 			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
 			
-
+			this.p.cono.changeDir(this.p.angle);
+			
+			this.kat.p.angle = this.p.angle;
+			
+			this.kat.p.x = this.p.x - ((this.p.w/4+this.kat.p.w*this.kat.p.scale/2) * Math.sin(this.p.dir*Math.PI/180));
+			this.kat.p.y = this.p.y - ((this.p.h/2+this.kat.p.w*this.kat.p.scale/2) * Math.cos(this.p.dir*Math.PI/180));
 
 			//gamestate
 		}
@@ -466,7 +590,7 @@ var game = function(){
 	});
 	
 	function checkState(){
-		if(Q.state.get("enemies") != 0){
+		if(Q.state.get("enemies") > 0){
 			Q.state.set("state", true);
 		}else{
 			Q.state.set("state", false);
@@ -482,24 +606,77 @@ var game = function(){
 	///////////////////////      KUMO       ////////////////////////////
 	////////////////////////////////////////////////////////////////////
 	
+	
+	//Kumo es muy similar al enemigo, te sigue y a cierta distancia se detiene. Lo siguiente es hacer la funcionalidad 
+	//de que te obedezca y se quede quieto. es fácil hacerlo pero habrá que tocar el quintus_input.
 	Q.Sprite.extend("Kumo", {
 	  
-	  init: function(p) {
-		this._super(p, {
-			asset: "kumo-jailed.png",
-			scale: 0.2,
-			x: 4500,
-			y: 500
-		});
-		this.add('2d');
-		this.on("hit", this, "win");
-	  },
-	  win: function(collision){
-		if(collision.obj.isA("Hattori")){
-			collision.obj.del('platformerControls');
-			Q.stageScene("endGame", 2, {win: true, label: "You release the quacking!!"});
+		init: function(p) {
+			this._super(p, {
+				asset: "kumo-jailed.png",
+				scale: 0.2,
+				x: 4500,
+				y: 500,
+				v: 0,
+				dir: 0,
+				vel: 300,
+				firstLevel: true,
+				health: 20
+			});
+			this.add('2d');
+
+			if(this.p.firstLevel)	this.on("hit", this, "win");
+
+		},
+
+		win: function(collision){
+			if(collision.obj.isA("Hattori")){
+				collision.obj.del('platformerControls');
+				Q.stageScene("endGame", 2, {win: true, label: "You release the quacking!!"});
+			}
+		},
+		
+		hurt: function(){
+			this.p.health -= 10;
+			if(this.p.health <= 0){
+				this.die();
+			}
+		},
+				
+		distance: function(){
+			var x = this.p.x-hattori.p.x;
+			var y = this.p.y-hattori.p.y;
+			
+			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
+		},
+		
+		die: function(){
+			this.destroy();
+			Q.stageScene("endGame", 2, {win: false, label: "Kumo dies. Try again!"});
+		},
+		
+		trigonometry: function (x, y){
+			var cos = (x-this.p.x)/(Q.width/2);
+			var sin = -(y-this.p.y)/(Q.height/2);
+			
+			var angle = (Math.atan(sin/cos)/(Math.PI/180));
+			if(cos<0)
+				angle += 180;
+
+			return angle;
+		},
+		
+		step: function(){
+			this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
+			if(this.distance() < hattori.p.h){
+				this.p.v = 0;
+			}
+			else{
+				this.p.v = this.p.vel;
+			}
+			this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
+			this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
 		}
-	  }
 	  
 	});
 	
@@ -532,9 +709,10 @@ var game = function(){
 		},
 		
 		hit: function(collision){
+			//console.log(collision.obj.className + "  " + collision.obj.p.x + "  " + collision.obj.p.y);
 			if(this.p.shooter == "Hattori"){  //hattori throws it
 				if(!collision.obj.isA("Hattori")){
-					if(collision.obj.isA("Enemy") ){	//si da a enemy
+					if(collision.obj instanceof Q.Enemy ){	//si da a enemy
 						collision.obj.hurt();
 					}
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
@@ -542,7 +720,8 @@ var game = function(){
 					}
 				}
 			}else{
-				if(collision.obj.isA("Enemy") && this.p.shooter != collision.obj.p.id){ //si da enemigo que no lo lanzó
+			
+				if((collision.obj instanceof Q.Enemy) && this.p.shooter != collision.obj.p.id){ //si da enemigo que no lo lanzó
 					console.log("es un enemy y no coincide el id. Fuego amigo!");
 					collision.obj.hurt();
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
@@ -551,11 +730,11 @@ var game = function(){
 				}/*else if(collision.obj.isA("Enemy") && this.p.shooter == collision.obj.p.id){
 					console.log("se da a sí mismo");
 				}*/else{
-					if(collision.obj.isA("Hattori")){	//si da a hattori
+					if(collision.obj.isA("Hattori") || collision.obj.isA("Kumo")){	//si da a hattori o a Kumo
 						collision.obj.hurt();
 					}
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking) 
-							&& !(collision.obj.isA("Enemy") && this.p.shooter == collision.obj.p.id)){
+							&& !((collision.obj instanceof Q.Enemy) && this.p.shooter == collision.obj.p.id)){
 						this.destroy();
 					}
 				}
@@ -578,7 +757,8 @@ var game = function(){
 				sensor: true,
 				scale:0.1,
 				attacking: false,
-				finAttack: false
+				finAttack: false,
+				owner: "Hattori"
 			});
 			this.p.cy = 0;
 			this.p.cx = this.p.w/2;
@@ -588,9 +768,18 @@ var game = function(){
 		},
 		
 		hit: function(collision){
+			
 			if(this.p.attacking && !this.p.finAttack){
-				if(!collision.obj.isA("Hattori")){
-					if(collision.obj.isA("Enemy")){
+				if(this.p.owner == "Hattori"){  //hattori attacks
+					if(!collision.obj.isA("Hattori")){
+						if(collision.obj instanceof Q.Enemy ){	//si da a enemy
+							collision.obj.hurt();
+							this.p.finAttack = true;
+						}
+					}
+				}else{
+					console.log("ataque de enemigo");
+					if(collision.obj.isA("Hattori")){	//si da a hattori
 						collision.obj.hurt();
 						this.p.finAttack = true;
 					}
@@ -728,7 +917,11 @@ var game = function(){
 				this.p.alert = 300;
 				//console.log(collision.obj.className);
 			}
-		},	
+		},
+		
+		changeDir: function(angle){
+			this.p.angle = angle;
+		},
 		
 		step:function(dt){
 			if(this.p.alert > 0)
@@ -797,7 +990,7 @@ var game = function(){
 
 	var iter = 0;
 	var introduction = 
-		["En el japón feudal, los guerreros más letales \n eran los samurais. Pero sin duda alguna, el samurai \n más letal y más cruel era Hattori Hanzo.",
+		["En el japón feudal, los guerreros más letales \n eran los samurais. Pero sin duda alguna, el mejor \n de todos y el más cruel era Hattori Hanzo.",
 			"Cuando su señor lo reclutó siendo un niño, después \n de arrasar su aldea, él no miró atrás.",
 			"Cuando su señor lo sometió al más duro entrenamiento, \n recibiendo palizas y torturas, él no se quejó.",
 			"Se convirtió en el guerrero más peligroso y sanguinario. \n En la batalla no hacía concesiones a nadie, \n ni a hombres, ni a mujeres, ni a niños.",
@@ -807,20 +1000,47 @@ var game = function(){
 			"Su señor, intentando demostrar su poder, \n le arrebató a Hattori, \n lo único que de verdad había amado...",
 			"Su pato Kumo.",
 			"En aquel momento, Hattori decidió exiliarse \n y convertirse en un Ronin en busca de su pato \n y de venganza."];
-			
+	var imagesIntro = 
+		["city.jpg",
+			"city.jpg",
+			"city.jpg",
+			"army-sun.jpg",
+			"army-sun.jpg",
+			"swords.jpg",
+			"valley.jpg",
+			"valley.jpg",
+			"kumo.png",
+			"hatt2.jpg"];
+	
+	function scaleToQuintus(w, h, greater){
+		var newWidth, newHeight;
+		newWidth = Q.width / w;
+		newHeight = Q.height / h;
+		
+		if(greater){
+			if(newWidth > newHeight) return newWidth;
+			else return newHeight;
+		}else{
+			if(newWidth < newHeight) return newWidth;
+			else return newHeight;
+		}
+		
+	};
+	
 	Q.scene('intro_0', function(stage) {  //Scene Fondo intro
 		var box = stage.insert(new Q.UI.Container({
 			cx: Q.height/2, cy: Q.height/2, fill: "rgba(0,0,0,1)"
 		}));
-		//var intro = box.insert(new Q.UI.Text({x: Q.width/2, y: Q.height/2, fill: "#FFF", label: "Historia de Hattori y su pato Kumo"}));
-		
-		var fondo = box.insert(new Q.Sprite({x: Q.width/2, y: Q.height/2, h: Q.height, w: Q.width, asset: "city.jpg"})); 
 		
 		
-		//document.addEventListener("keyup", listener);
-		//document.addEventListener("touchend", init);
+		var fondo = box.insert(new Q.Sprite({x: Q.width/2, y: Q.height/2, asset: imagesIntro[iter]})); 
+		if(fondo.p.asset == "kumo.png")
+			fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, false);
+		else
+			fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, true);
 		
-	});		
+	});	
+	
 	Q.scene('intro_1', function(stage) {   //Scene texto intro
 		var box = stage.insert(new Q.UI.Container({
 			cx: Q.height/2, cy: Q.height/2
@@ -898,7 +1118,8 @@ var game = function(){
 		Q.stageTMX("mapa2.tmx", stage);
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
-		var kumo = stage.insert(new Q.Kumo({x: 500, y: 2500}));
+		var kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
+		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
 		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		/*var enemies=[];
@@ -906,16 +1127,17 @@ var game = function(){
 			enemies[i]=stage.insert(new Q.Enemy({x:(i+10)*100}));
 		}*/
 		
-		var enemy = stage.insert(new Q.Enemy({}));
-		var enemy2 = stage.insert(new Q.Enemy({x:700, y:2000, scale: 1, health: 60}));
-		var enemy3 = stage.insert(new Q.Enemy({x:2800, y:800}));
-		var enemy4 = stage.insert(new Q.Enemy({x:3600, y:700, dir: 0}));
-		var enemy5 = stage.insert(new Q.Enemy({x:3600, y:2500}));
-		var enemy6 = stage.insert(new Q.Enemy({x:3600, y:1500, dir: 0}));
-		var enemy7 = stage.insert(new Q.Enemy({x:5600, y:700}));
-		var enemy8 = stage.insert(new Q.Enemy({x:6600, y:700}));
-		var enemy9 = stage.insert(new Q.Enemy({x:6400, y:1700}));
-		var enemy10 = stage.insert(new Q.Enemy({x:6400, y:2700}));
+		//var enemy = stage.insert(new Q.Shooter({}));
+		var enemy1 = stage.insert(new Q.Melee({}));
+		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60}));
+		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
+		var enemy4 = stage.insert(new Q.Shooter({x:3600, y:700, dir: 0}));
+		var enemy5 = stage.insert(new Q.Shooter({x:3600, y:2500}));
+		var enemy6 = stage.insert(new Q.Shooter({x:3600, y:1500, dir: 0}));
+		var enemy7 = stage.insert(new Q.Shooter({x:5600, y:700}));
+		var enemy8 = stage.insert(new Q.Shooter({x:6600, y:700}));
+		var enemy9 = stage.insert(new Q.Shooter({x:6400, y:1700}));
+		var enemy10 = stage.insert(new Q.Shooter({x:6400, y:2700}));
 		
 		center.follow(hattori, {x:true, y:true});
 	});
