@@ -84,19 +84,6 @@ var game = function(){
 	document.addEventListener('contextmenu', function(e){
 						e.preventDefault(); 
 						kumo.rush();}, false);
-
-	/*document.body.onclick = function (e) {
-    var isRightMB;
-	e.preventDefault();
-    e = e || window.event;
-
-    if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-        isRightMB = e.which == 3; 
-    else if ("button" in e)  // IE, Opera 
-        isRightMB = e.button == 2; 
-
-    alert("Right mouse button " + (isRightMB ? "" : " was not") + "clicked!");
-} */
 	
 	
 	////////////////////////////////////////////////////////////////////
@@ -137,7 +124,7 @@ var game = function(){
 		},
 		
 		kumoMode: function(){
-			console.log("kumo mode");
+			//console.log("kumo mode");
 			if(!kumo.p.firstLevel){
 				if(!kumo.p.stopped){
 					kumo.p.vel = 0;
@@ -256,7 +243,7 @@ var game = function(){
 			
 			this.kat.p.x = this.p.x - ((this.p.w/4+this.kat.p.w*this.kat.p.scale/2) * Math.sin(this.p.dir*Math.PI/180));
 			this.kat.p.y = this.p.y - ((this.p.h/2+this.kat.p.w*this.kat.p.scale/2) * Math.cos(this.p.dir*Math.PI/180));
-			//console.log(this.p.enemies);		
+			////console.log(this.p.enemies);		
 		}
 
 
@@ -288,6 +275,7 @@ var game = function(){
 				state: 0,
 				cono: 0,
 				coldownAttack: 100,
+				alert: 0,
 				health: 30,
 				id: "Enemy"+idEnemy,
 				first: true
@@ -304,6 +292,10 @@ var game = function(){
 			if(this.p.state == 0){
 				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken") || collision.obj.isA("Katana")){
 					this.p.state = 1;
+					this.p.alert=300;
+					this.p.cono.p.asset = "cono_grande.png";
+					this.p.cono.size(true);
+					Q._generatePoints(this.p.cono,true);
 					Q.state.inc("enemies", 1);
 					checkState();
 				}else{
@@ -320,6 +312,10 @@ var game = function(){
 		collisiony:function(collision){
 			if(this.p.state == 0){
 				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken") || collision.obj.isA("Katana")){
+					this.p.alert=300;
+					this.p.cono.p.asset = "cono_grande.png";
+					this.p.cono.size(true);
+					Q._generatePoints(this.p.cono,true);
 					this.p.state = 1;
 					Q.state.inc("enemies", 1);
 					checkState();
@@ -363,7 +359,7 @@ var game = function(){
 				Q.state.inc("enemies", 1);
 				checkState();
 			}
-		
+			this.p.alert=300;
 			this.p.state = 1;
 			
 			this.p.health -= damage;
@@ -420,6 +416,7 @@ var game = function(){
 				this.p.cono = this.stage.insert(new Q.Cono());
 				this.p.first=false;
 			}
+			
 			this.play("stand");
 			this.p.angle = -this.p.dir-90;
 
@@ -432,8 +429,8 @@ var game = function(){
 					this.p.v = this.p.vel;
 				}
 				
-				if(this.p.coldownAttack){		//los tiradores disparan cada cierto tiempo si te persiguen.
-					this.p.coldownAttack --;		//los meeles atacaran si estás en su cono de visión.
+				if(this.p.coldownAttack && this.p.cono.p.alert){		//los tiradores disparan cada cierto tiempo si te ven.
+					this.p.coldownAttack --;							//los meeles atacaran si estás en su cono de visión.
 				}else{
 					this.fire();
 				}
@@ -452,7 +449,12 @@ var game = function(){
 			this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
 			this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
 			
-			if(this.p.cono.p.alert > 0){
+			if(this.p.alert>0){
+				this.p.alert--;
+			}
+			
+			if(this.p.cono.p.alert){
+				this.p.alert=300;
 				if(this.p.state == 0){
 					this.p.cono.p.asset = "cono_grande.png";
 					this.p.cono.size(true);
@@ -461,7 +463,7 @@ var game = function(){
 					checkState();
 				}
 				this.p.state = 1;
-			}else if(this.p.cono.p.alert <= 0){ 
+			}else if(this.p.alert <= 0){ 
 				if(this.p.state == 1){
 					this.p.cono.p.asset="cono.png";
 					this.p.cono.size(true);
@@ -515,7 +517,7 @@ var game = function(){
 			if(this.p.coldownAttack<=0){
 				this.p.coldownAttack=150;
 				kat.attacking = true;
-				console.log("attack");
+				//console.log("attack");
 				this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
 				
 				.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
@@ -535,6 +537,7 @@ var game = function(){
 		},
 		
 		step: function(dt){
+			console.log(this.p.alert);
 			if(this.p.first){
 				this.kat = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir, owner: this.p.id}));
 				this.p.cono = this.stage.insert(new Q.Cono());
@@ -553,7 +556,7 @@ var game = function(){
 				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
 				if(this.distance() < hattori.p.h){
 					this.p.v = 0;
-					if(this.p.coldownAttack){
+					if(this.p.coldownAttack ){
 						this.p.coldownAttack --;
 					}else{
 						this.fire();
@@ -580,7 +583,13 @@ var game = function(){
 			this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
 			this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
 			
-			if(this.p.cono.p.alert > 0){
+			if(this.p.alert>0){
+				this.p.alert--;
+			}
+			
+			if(this.p.cono.p.alert){
+				console.log("visto");
+				this.p.alert=300;
 				if(this.p.state == 0){
 					this.p.cono.p.asset = "cono_grande.png";
 					this.p.cono.size(true);
@@ -589,9 +598,9 @@ var game = function(){
 					checkState();
 				}
 				this.p.state = 1;
-			}else if(this.p.cono.p.alert <= 0){ 
+			}else if(this.p.alert <= 0){ 
 				if(this.p.state == 1){
-					this.p.cono.p.asset = "cono.png";
+					this.p.cono.p.asset="cono.png";
 					this.p.cono.size(true);
 					Q._generatePoints(this.p.cono,true);
 					Q.state.inc("enemies", -1);
@@ -600,7 +609,6 @@ var game = function(){
 
 				this.p.state = 0;
 			}
-			
 			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
 			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
 			
@@ -691,6 +699,7 @@ var game = function(){
 					}
 				}
 			}
+
 		},
 		
 		win: function(collision){
@@ -778,7 +787,7 @@ var game = function(){
 		},
 		
 		hit: function(collision){
-			//console.log(collision.obj.className + "  " + collision.obj.p.x + "  " + collision.obj.p.y);
+			////console.log(collision.obj.className + "  " + collision.obj.p.x + "  " + collision.obj.p.y);
 			if(this.p.shooter == "Hattori"){  //hattori throws it
 				if(!collision.obj.isA("Hattori")){
 					if(collision.obj instanceof Q.Enemy ){	//si da a enemy
@@ -793,11 +802,12 @@ var game = function(){
 				if((collision.obj instanceof Q.Enemy) && this.p.shooter != collision.obj.p.id){ //si da enemigo que no lo lanzó
 					console.log("es un enemy y no coincide el id. Fuego amigo!");
 					collision.obj.hurt(10);
+
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
 						this.destroy();
 					}
 				}/*else if(collision.obj.isA("Enemy") && this.p.shooter == collision.obj.p.id){
-					console.log("se da a sí mismo");
+					//console.log("se da a sí mismo");
 				}*/else{
 					if(collision.obj.isA("Hattori") || (collision.obj.isA("Kumo") && !collision.obj.p.attacking)){	//si da a hattori o a Kumo
 						collision.obj.hurt(10);
@@ -848,7 +858,7 @@ var game = function(){
 						}
 					}
 				}else{
-					console.log("ataque de enemigo");
+					//console.log("ataque de enemigo");
 					if(collision.obj.isA("Hattori")){	//si da a hattori
 						collision.obj.hurt(15);
 						this.p.finAttack = true;
@@ -973,7 +983,7 @@ var game = function(){
 				x: 500,
 				y: 800,
 				opacity: 0.5,
-				alert: 0,
+				alert: false,
 				scale:1
 			});
 			this.p.sensor=true;
@@ -983,8 +993,9 @@ var game = function(){
 		},
 		
 		hit: function(collision){
+			
 			if(collision.obj.isA("Hattori") || (collision.obj.isA("Shuriken") && !collision.obj.p.enemy)){
-				this.p.alert = 300;
+				this.p.alert = true;
 				//console.log(collision.obj.className);
 			}
 		},
@@ -994,8 +1005,7 @@ var game = function(){
 		},
 		
 		step:function(dt){
-			if(this.p.alert > 0)
-				this.p.alert--;
+			this.p.alert = false;
 		}
 		
 	});
