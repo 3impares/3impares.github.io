@@ -81,7 +81,9 @@ var game = function(){
 		};
 	};
 
-	document.addEventListener('contextmenu', function(e){e.preventDefault(); console.log("click derecho"); kumo.attack();}, false);
+	document.addEventListener('contextmenu', function(e){
+						e.preventDefault(); 
+						kumo.rush();}, false);
 
 	/*document.body.onclick = function (e) {
     var isRightMB;
@@ -193,7 +195,6 @@ var game = function(){
 			}else{	//shuriken attack
 				if(this.p.coldownAttack==0 && Q.state.get("shurikens")>0){
 					this.p.coldownAttack = 50;
-					var mouse = getMouse(evt);
 					
 					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, shooter: this.className}));
 					
@@ -274,14 +275,14 @@ var game = function(){
 			this._super(p, {
 				sheet: "enemy",
 				sprite: "enemy anim",
-				x:1000,
-				y:500,
-				scale:0.5,
-				dir:130,
-				time:0,
-				patrolTime:8000,
-				patrol:100,
-				v:0,
+				x: 1000,
+				y: 500,
+				scale: 0.5,
+				dir: 130,
+				time: 0,
+				patrolTime: 8000,
+				patrol: 100,
+				v: 0,
 				turning:false,
 				vel: 300,
 				state: 0,
@@ -289,7 +290,7 @@ var game = function(){
 				coldownAttack: 100,
 				health: 30,
 				id: "Enemy"+idEnemy,
-				first:true
+				first: true
 			});
 			
 			idEnemy++;
@@ -354,7 +355,7 @@ var game = function(){
 			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
 		},
 		
-		hurt: function(){
+		hurt: function(damage){
 			if(this.p.state == 0){
 				this.p.cono.p.asset = "cono_grande.png";
 				this.p.cono.size(true);
@@ -364,7 +365,8 @@ var game = function(){
 			}
 		
 			this.p.state = 1;
-			this.p.health -= 10;
+			
+			this.p.health -= damage;
 
 			if(this.p.health <= 0){
 				this.die();
@@ -398,11 +400,11 @@ var game = function(){
 	Q.Enemy.extend("Shooter", {
 
 		init: function(p){
-			this._super(p, {
-				vel:300,
-				coldownAttack: 100,
-				health: 30
-			});
+			this._super(p, {});
+			
+			this.p.health = 30;
+			this.p.coldownAttack = 100;
+			this.p.vel = 300;
 		},
 		
 		fire: function(){
@@ -486,11 +488,12 @@ var game = function(){
 	Q.Enemy.extend("Melee", {
 		init: function(p){
 			this._super(p, {
-				vel:400,
-				coldownAttack: 150,
-				health: 50,
 				katana: 0
 			});
+			
+			this.p.health = 50;
+			this.p.coldownAttack = 150;
+			this.p.vel = 350;
 			
 			var kat = this.p.katana;
 		},
@@ -630,9 +633,6 @@ var game = function(){
 	///////////////////////      KUMO       ////////////////////////////
 	////////////////////////////////////////////////////////////////////
 	
-	
-	//Kumo es muy similar al enemigo, te sigue y a cierta distancia se detiene. Lo siguiente es hacer la funcionalidad 
-	//de que te obedezca y se quede quieto.
 	Q.Sprite.extend("Kumo", {
 		init: function(p) {
 			this._super(p, {
@@ -644,36 +644,53 @@ var game = function(){
 				dir: 0,
 				vel: 350,
 				firstLevel: true,
+				attacking: false,
+				lastCollision: "",
 				stopped: false,
 				health: 20
 			});
-			this.add('2d');
+			this.add('2d, tween');
 
 			if(this.p.firstLevel){
 				this.on("hit", this, "win");
-			}/*else{
-				this.on("kumoMode", this, "kumoMode");
-			}*/
-		},
-		/*
-		kumoMode: function(){
-			console.log("espada");
-			if(!this.p.firstLevel){
-				if(!this.p.stopped){
-					this.p.vel = 0;
-					this.p.stopped = true;
-				}else{
-					this.p.vel = 400;
-					this.stopped = false;
-				}
+			}else{
+				this.on("hit", this, "strike");
 			}
 		},
-		*/
-		attack: function(){
+
+		rush: function(){
 			console.log("ataque de kumo");
-			/*if(){
-				
-			}*/
+			if(!this.p.firstLevel){
+				this.p.dir = this.trigonometry(mousex, mousey);
+				this.p.attacking = true;
+				this.p.lastCollision = "";
+				var self = this;
+				this.animate({speed: 1000, 
+								x: (mousex*Q.width/window.innerWidth - Q.width/2 + hattori.p.x), 
+								y: (mousey*Q.height/window.innerHeight - Q.height/2 + hattori.p.y), 
+								vx: -30*Math.sin(this.p.dir*(Math.PI/180)), 
+								vy: 30*Math.cos(this.p.dir*(Math.PI/180))
+							}, 0.2, {callback: function(){
+													self.p.stopped = true;
+													self.p.vx = 0;
+													self.p.vy = 0;
+													Q.state.set("kumoMode", "kumoStop.png");
+													self.p.attacking = false;	
+							}});
+			}
+		},
+		
+		strike: function(collision){
+			if(this.p.attacking){
+				if(collision.obj.isA("TileLayer")){
+					this.stop();
+				}else if(collision.obj instanceof Q.Enemy){
+					if(this.p.lastCollision != collision.obj.p.id){
+						collision.obj.hurt(20);
+						this.p.lastCollision = collision.obj.p.id
+					}
+				}
+			}
 		},
 		
 		win: function(collision){
@@ -683,16 +700,16 @@ var game = function(){
 			}
 		},
 		
-		hurt: function(){
-			this.p.health -= 10;
+		hurt: function(damage){
+			this.p.health -= damage;
 			if(this.p.health <= 0){
 				this.die();
 			}
 		},
 				
 		distance: function(){
-			var x = this.p.x-hattori.p.x;
-			var y = this.p.y-hattori.p.y;
+			var x = this.p.x - hattori.p.x;
+			var y = this.p.y - hattori.p.y;
 			
 			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
 		},
@@ -714,7 +731,7 @@ var game = function(){
 		},
 		
 		step: function(){
-			if(!this.p.firstLevel){
+			if(!this.p.firstLevel && !this.p.stopped){
 				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
 				if(this.distance() < hattori.p.h*1.5){
 					this.p.v = -this.p.vel;
@@ -743,12 +760,12 @@ var game = function(){
 	Q.Sprite.extend("Shuriken",{
 		init:function(p){
 			this._super(p,{
-				dir:0,
+				dir: 0,
 				asset:"shuriken.png",
-				vy:0,
-				vx:0,
+				vy: 0,
+				vx: 0,
 				sensor: true,
-				scale:0.2,
+				scale: 0.2,
 				shooter: ""
 			});
 			this.p.vy = -Q.height*Math.sin(this.p.dir*(Math.PI/180));
@@ -765,7 +782,7 @@ var game = function(){
 			if(this.p.shooter == "Hattori"){  //hattori throws it
 				if(!collision.obj.isA("Hattori")){
 					if(collision.obj instanceof Q.Enemy ){	//si da a enemy
-						collision.obj.hurt();
+						collision.obj.hurt(10);
 					}
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
 						this.destroy();
@@ -775,18 +792,19 @@ var game = function(){
 			
 				if((collision.obj instanceof Q.Enemy) && this.p.shooter != collision.obj.p.id){ //si da enemigo que no lo lanzó
 					console.log("es un enemy y no coincide el id. Fuego amigo!");
-					collision.obj.hurt();
+					collision.obj.hurt(10);
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
 						this.destroy();
 					}
 				}/*else if(collision.obj.isA("Enemy") && this.p.shooter == collision.obj.p.id){
 					console.log("se da a sí mismo");
 				}*/else{
-					if(collision.obj.isA("Hattori") || collision.obj.isA("Kumo")){	//si da a hattori o a Kumo
-						collision.obj.hurt();
+					if(collision.obj.isA("Hattori") || (collision.obj.isA("Kumo") && !collision.obj.p.attacking)){	//si da a hattori o a Kumo
+						collision.obj.hurt(10);
 					}
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking) 
-							&& !((collision.obj instanceof Q.Enemy) && this.p.shooter == collision.obj.p.id)){
+							&& !((collision.obj instanceof Q.Enemy) && this.p.shooter == collision.obj.p.id)
+							&& !(collision.obj.isA("Kumo") && collision.obj.p.attacking)){
 						this.destroy();
 					}
 				}
@@ -804,17 +822,17 @@ var game = function(){
 	Q.Sprite.extend("Katana",{
 		init:function(p){
 			this._super(p,{
-				dir:0,
-				asset:"katana.png",
+				dir: 0,
+				asset: "katana.png",
 				sensor: true,
-				scale:0.1,
+				scale: 0.1,
 				attacking: false,
 				finAttack: false,
 				owner: "Hattori"
 			});
 			this.p.cy = 0;
 			this.p.cx = this.p.w/2;
-			this.add('2animation, tween');
+			this.add('tween');
 			this.size(true);
 			this.on("hit",this,"hit");
 		},
@@ -825,14 +843,14 @@ var game = function(){
 				if(this.p.owner == "Hattori"){  //hattori attacks
 					if(!collision.obj.isA("Hattori")){
 						if(collision.obj instanceof Q.Enemy ){	//si da a enemy
-							collision.obj.hurt();
+							collision.obj.hurt(15);
 							this.p.finAttack = true;
 						}
 					}
 				}else{
 					console.log("ataque de enemigo");
 					if(collision.obj.isA("Hattori")){	//si da a hattori
-						collision.obj.hurt();
+						collision.obj.hurt(15);
 						this.p.finAttack = true;
 					}
 				}
@@ -1118,7 +1136,7 @@ var game = function(){
 		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: txt
 						})); 
-		var skip = box.insert(new Q.UI.Button({x: 5*Q.width/8, y: 3*Q.height/4, font: "15pt",
+		var skip = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 7*Q.height/8, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: "Omitir"
 						})); 
 		
@@ -1135,7 +1153,7 @@ var game = function(){
 		});
 		
 		skip.on("click", function(){
-				init();
+			init();
 		});
 		
 		next.on("touchend", function(){
