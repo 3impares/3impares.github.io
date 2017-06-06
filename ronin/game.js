@@ -109,8 +109,8 @@ var game = function(){
 			
 			this.add('2d, animation, platformerControls, tween');
 			this.on("attackFin", this, "attackFin");
-			this.on("swordAttack", this, "swordAttack");
-			this.on("shurikenAttack", this, "shurikenAttack");
+			this.on("kumoMode", this, "kumoMode");
+			this.on("changeAttack", this, "changeAttack");
 			this.on("clickEvent", this, "fire");
 			this.on("roll", this, "roll");
 			this.play("stand");
@@ -120,16 +120,25 @@ var game = function(){
 			Q.state.set("state", 0);
 		},
 		  
-		swordAttack: function(){
+		kumoMode: function(){
 			Q.state.set("weapon", "leonard-katana.png");
 			this.p.attackType = true;
 		},
 		  
-		shurikenAttack: function(){
+		changeAttack: function(){
 
 			//if(this.p.attackType){
-				this.p.attackType = false;
-				Q.state.set("weapon", "sh.png");
+				//this.p.attackType = !this.p.attackType;
+				console.log("espada");
+				if(!this.p.attackType){
+					this.p.attackType = true;
+					Q.state.set("weapon", "leonard-katana.png");
+				}
+				else{
+					this.p.attackType = false;
+					Q.state.set("weapon", "sh.png");
+					
+				}
 			/*}else{
 				this.p.attackType = true;
 				Q.state.set("weapon", "katana_sym.png");
@@ -620,6 +629,7 @@ var game = function(){
 				v: 0,
 				dir: 0,
 				vel: 300,
+				
 				firstLevel: true,
 				health: 20
 			});
@@ -668,8 +678,11 @@ var game = function(){
 		
 		step: function(){
 			this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
-			if(this.distance() < hattori.p.h){
-				this.p.v = 0;
+			if(this.distance() < hattori.p.h*1.5){
+				this.p.v = -this.p.vel;
+			}
+			else if(this.distance() < hattori.p.h*2){
+				this.p.v=0;
 			}
 			else{
 				this.p.v = this.p.vel;

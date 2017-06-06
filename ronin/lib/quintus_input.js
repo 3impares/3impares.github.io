@@ -65,8 +65,8 @@ Quintus.Input = function(Q) {
 	RIGHT: 'right',	D: 'right',
     UP: 'up',     	W: 'up',
 	DOWN: 'down',	S: 'down',
-	Q: 'shurikenAttack',
-	E: 'swordAttack',
+	Q: 'changeAttack',
+	E: 'kumoMode',
 	R: 'roll',
     SPACE: 'roll',
     Z: 'fire',
@@ -890,12 +890,12 @@ Quintus.Input = function(Q) {
 		  p.vx = 0;
         }
 		
-		if(Q.inputs['swordAttack']){
-			this.entity.trigger('swordAttack', this.entity);
+		if(Q.inputs['changeAttack']){
+			this.entity.trigger('changeAttack', this.entity);
 		}
 
-		if(Q.inputs['shurikenAttack']){
-			this.entity.trigger('shurikenAttack', this.entity);
+		if(Q.inputs['kumoMode']){
+			this.entity.trigger('kumoMode', this.entity);
 		}
     if(Q.inputs['roll']){
       this.entity.trigger('roll', this.entity);
