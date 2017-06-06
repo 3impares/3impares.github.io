@@ -675,7 +675,7 @@ Quintus.Input = function(Q) {
 
       ctx.save();
       ctx.beginPath();
-      ctx.globalAlpha=joypad.alpha;
+      ctx.globalAlpha = joypad.alpha;
       ctx.fillStyle = color;
       ctx.arc(x, y, size, 0, Math.PI*2, true);
       ctx.closePath();
@@ -797,7 +797,9 @@ Quintus.Input = function(Q) {
       this.entity.on("step",this,"step");
       this.entity.on("bump.bottom",this,"landed");
 	  var self = this.entity;
-	  Q.el.addEventListener("click", function(){self.trigger('clickEvent', self);}, true);
+	  Q.el.addEventListener("click", function(e){self.trigger('clickLeft', self);}, true);
+	  //Q.el.addEventListener("oncontextmenu", function(e){e.preventDefault(); alert("click derecho"); return false;}, false);
+	  //Q.el.addEventListener("oncontextmenu", function(e){console.log("click derecho"); }, true);
 
       p.landed = 0;
       p.direction ='right';
@@ -891,10 +893,12 @@ Quintus.Input = function(Q) {
         }
 		
 		if(Q.inputs['changeAttack']){
+			Q.inputs['changeAttack'] = false;
 			this.entity.trigger('changeAttack', this.entity);
 		}
 
 		if(Q.inputs['kumoMode']){
+			Q.inputs['kumoMode'] = false;
 			this.entity.trigger('kumoMode', this.entity);
 		}
     if(Q.inputs['roll']){

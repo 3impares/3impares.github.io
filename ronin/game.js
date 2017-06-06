@@ -31,30 +31,29 @@ var game = function(){
 		health: maxHealth,
 		shurikens: maxShurikens,
 		weapon: "leonard-katana.png",
+		kumoMode: "kumoFollow.png",
 		enemies: 0,
 		state: false
 	});
-	Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+	Q.state.on("change.health, change.shurikens, change.weapon, change.kumoMode, change.state", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
 
-
-
-	Q.load(["katana.png", "katana.json", "htt.png", "htt.json", "cono_grande.png", "cono.png", "hattori.png",
+	Q.load(["katana.png", "katana.json", "cono_grande.png", "cono.png", "hattori.png",
 				 "hattori.json", "shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json",
-				 "shuriken_sym.png", "shuriken_sym.json", "katana_sym.png", "katana_sym.json", "shurikenEnemy.png",
-				 "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", "calm.png", "alert.png", "leonard-katana.png",
-				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg"], function(){
+				 "shurikenEnemy.png", "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", 
+				 "calm.png", "alert.png", "leonard-katana.png",
+				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg",
+				 "kumoStop.png", "kumoFollow.png"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
-		Q.compileSheets("htt.png", "htt.json");
 		Q.compileSheets("cursor.png", "cursor.json");
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
 	});
 
 	Q.animations("hattori_anim", {
-		attack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/30, flip: false, loop:false, next:"stand", trigger: "attackFin"}, 
+		//attack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/30, flip: false, loop:false, next:"stand", trigger: "attackFin"}, 
 		stand: { frames: [0], rate: 1/10, flip:false}
 	});
 		
@@ -65,7 +64,7 @@ var game = function(){
 	var center;
 	
 	var mousex=0, mousey=0;
-	var hattori;
+	var hattori, kumo;
 	
 	Q.el.addEventListener('mousemove',function(e) {
 		var rect = canvas.getBoundingClientRect();
@@ -82,7 +81,22 @@ var game = function(){
 		};
 	};
 
+	document.addEventListener('contextmenu', function(e){e.preventDefault(); console.log("click derecho"); kumo.attack();}, false);
 
+	/*document.body.onclick = function (e) {
+    var isRightMB;
+	e.preventDefault();
+    e = e || window.event;
+
+    if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = e.which == 3; 
+    else if ("button" in e)  // IE, Opera 
+        isRightMB = e.button == 2; 
+
+    alert("Right mouse button " + (isRightMB ? "" : " was not") + "clicked!");
+} */
+	
+	
 	////////////////////////////////////////////////////////////////////
 	//////////////////////      HATTORI       //////////////////////////
 	////////////////////////////////////////////////////////////////////
@@ -109,9 +123,9 @@ var game = function(){
 			
 			this.add('2d, animation, platformerControls, tween');
 			this.on("attackFin", this, "attackFin");
-			this.on("kumoMode", this, "kumoMode");
+			this.on("kumoMode", this, "kumoMode"); //Esto va en Kumo
 			this.on("changeAttack", this, "changeAttack");
-			this.on("clickEvent", this, "fire");
+			this.on("clickLeft", this, "fire");
 			this.on("roll", this, "roll");
 			this.play("stand");
 			
@@ -119,36 +133,37 @@ var game = function(){
 			Q.state.set("weapon", "leonard-katana.png");
 			Q.state.set("state", 0);
 		},
-		  
+		
 		kumoMode: function(){
-			Q.state.set("weapon", "leonard-katana.png");
-			this.p.attackType = true;
+			console.log("kumo mode");
+			if(!kumo.p.firstLevel){
+				if(!kumo.p.stopped){
+					kumo.p.vel = 0;
+					kumo.p.stopped = true;
+					Q.state.set("kumoMode", "kumoStop.png");
+				}else{
+					kumo.p.vel = 350;
+					kumo.p.stopped = false;
+					Q.state.set("kumoMode", "kumoFollow.png");
+				}
+			}
 		},
-		  
+		
 		changeAttack: function(){
-
-			//if(this.p.attackType){
-				//this.p.attackType = !this.p.attackType;
-				console.log("espada");
-				if(!this.p.attackType){
-					this.p.attackType = true;
-					Q.state.set("weapon", "leonard-katana.png");
-				}
-				else{
-					this.p.attackType = false;
-					Q.state.set("weapon", "sh.png");
-					
-				}
-			/*}else{
+			if(!this.p.attackType){
 				this.p.attackType = true;
-				Q.state.set("weapon", "katana_sym.png");
-			}*/
-
+				Q.state.set("weapon", "leonard-katana.png");
+			}
+			else{
+				this.p.attackType = false;
+				Q.state.set("weapon", "sh.png");
+				
+			}
 		},
 		
 		roll: function(){
-			if(this.p.coldRoll==0){
-				this.p.coldRoll=50;
+			if(this.p.coldRoll == 0){
+				this.p.coldRoll = 50;
 				this.animate({speed:800}, 0.2, {callback: function(){this.p.speed=400}});
 			}
 		},
@@ -280,13 +295,13 @@ var game = function(){
 			idEnemy++;
 			this.add('2d, animation, tween');
 			
-			this.on("bump.top, bump.bottom", "collisiony");
-		 	this.on("bump.right, bump.left", "collisionx");
+			this.on("bump.top, bump.bottom", this, "collisiony");
+		 	this.on("bump.right, bump.left", this, "collisionx");
 		},
 	
 		collisionx:function(collision){
 			if(this.p.state == 0){
-				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
+				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken") || collision.obj.isA("Katana")){
 					this.p.state = 1;
 					Q.state.inc("enemies", 1);
 					checkState();
@@ -303,7 +318,7 @@ var game = function(){
 		
 		collisiony:function(collision){
 			if(this.p.state == 0){
-				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken")){
+				if(collision.obj.isA("Hattori") || collision.obj.isA("Shuriken") || collision.obj.isA("Katana")){
 					this.p.state = 1;
 					Q.state.inc("enemies", 1);
 					checkState();
@@ -573,7 +588,7 @@ var game = function(){
 				this.p.state = 1;
 			}else if(this.p.cono.p.alert <= 0){ 
 				if(this.p.state == 1){
-					this.p.cono.p.asset="cono.png";
+					this.p.cono.p.asset = "cono.png";
 					this.p.cono.size(true);
 					Q._generatePoints(this.p.cono,true);
 					Q.state.inc("enemies", -1);
@@ -617,9 +632,8 @@ var game = function(){
 	
 	
 	//Kumo es muy similar al enemigo, te sigue y a cierta distancia se detiene. Lo siguiente es hacer la funcionalidad 
-	//de que te obedezca y se quede quieto. es fácil hacerlo pero habrá que tocar el quintus_input.
+	//de que te obedezca y se quede quieto.
 	Q.Sprite.extend("Kumo", {
-	  
 		init: function(p) {
 			this._super(p, {
 				asset: "kumo-jailed.png",
@@ -628,17 +642,40 @@ var game = function(){
 				y: 500,
 				v: 0,
 				dir: 0,
-				vel: 300,
-				
+				vel: 350,
 				firstLevel: true,
+				stopped: false,
 				health: 20
 			});
 			this.add('2d');
 
-			if(this.p.firstLevel)	this.on("hit", this, "win");
-
+			if(this.p.firstLevel){
+				this.on("hit", this, "win");
+			}/*else{
+				this.on("kumoMode", this, "kumoMode");
+			}*/
 		},
-
+		/*
+		kumoMode: function(){
+			console.log("espada");
+			if(!this.p.firstLevel){
+				if(!this.p.stopped){
+					this.p.vel = 0;
+					this.p.stopped = true;
+				}else{
+					this.p.vel = 400;
+					this.stopped = false;
+				}
+			}
+		},
+		*/
+		attack: function(){
+			console.log("ataque de kumo");
+			/*if(){
+				
+			}*/
+		},
+		
 		win: function(collision){
 			if(collision.obj.isA("Hattori")){
 				collision.obj.del('platformerControls');
@@ -677,18 +714,20 @@ var game = function(){
 		},
 		
 		step: function(){
-			this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
-			if(this.distance() < hattori.p.h*1.5){
-				this.p.v = -this.p.vel;
+			if(!this.p.firstLevel){
+				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
+				if(this.distance() < hattori.p.h*1.5){
+					this.p.v = -this.p.vel;
+				}
+				else if(this.distance() < hattori.p.h*2){
+					this.p.v=0;
+				}
+				else{
+					this.p.v = this.p.vel;
+				}
+				this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
+				this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
 			}
-			else if(this.distance() < hattori.p.h*2){
-				this.p.v=0;
-			}
-			else{
-				this.p.v = this.p.vel;
-			}
-			this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
-			this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
 		}
 	  
 	});
@@ -955,16 +994,17 @@ var game = function(){
 	Q.scene("HUD", function(stage) {
 		var sh = new Q.UI.Text({x: 100, y: 5, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
   		var weapon = new Q.Sprite({scale:0.2, x: sh.p.w+sh.p.x, y: 40, asset: Q.state.get("weapon")});
-		
+		var kumoMode = new Q.Sprite({scale:0.2, x: weapon.p.x+(weapon.p.w*weapon.p.scale)+20, y: 40, asset: Q.state.get("kumoMode")});
 		var box = stage.insert(new Q.UI.Container({x: 0, y: 0}));
 
-		var alert = new Q.Sprite({x: weapon.p.x+(weapon.p.w*weapon.p.scale)+10, y: 40, asset: "alert.png", opacity:0});;
+		var alert = new Q.Sprite({x: kumoMode.p.x+(kumoMode.p.w*kumoMode.p.scale)+20, y: 40, asset: "alert.png", opacity:0});;
 		if(Q.state.get("state")){
 			alert.p.opacity = 1;
 		}
 		
 		box.insert(sh);
 		box.insert(weapon);
+		box.insert(kumoMode);
 		box.insert(alert);
 
 	});
@@ -1075,13 +1115,16 @@ var game = function(){
 		var txt = "Siguiente";
 		if(iter == introduction.length-1) txt = "Jugar";	//last
 		
-		var but = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
+		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: txt
+						})); 
+		var skip = box.insert(new Q.UI.Button({x: 5*Q.width/8, y: 3*Q.height/4, font: "15pt",
+									fill: "rgba(100, 100, 100, 0.5)", label: "Omitir"
 						})); 
 		
 		iter++;
 		
-		but.on("click", function(){
+		next.on("click", function(){
 			if(iter < introduction.length){
 				Q.stageScene("intro_0", 0);
 				Q.stageScene("intro_1", 1);
@@ -1090,7 +1133,12 @@ var game = function(){
 				init();
 			}
 		});
-		but.on("touchend", function(){
+		
+		skip.on("click", function(){
+				init();
+		});
+		
+		next.on("touchend", function(){
 			if(iter < introduction.length){
 				Q.stageScene("intro_0", 0);
 				Q.stageScene("intro_1", 1);
@@ -1131,7 +1179,7 @@ var game = function(){
 		Q.stageTMX("mapa2.tmx", stage);
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
-		var kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
+		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
 		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
 		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
