@@ -41,13 +41,14 @@ var game = function(){
 				});
 
 	Q.load(["katana.png", "katana.json", "cono_grande.png", "cono.png", "hattori.png",
-				 "hattori.json", "shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json",
+				 "hattori.json", "kumo.json", "shuriken.png", "cursor.png", "cursor.json", "enemy.png", "enemy.json",
 				 "shurikenEnemy.png", "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", 
 				 "calm.png", "alert.png", "leonard-katana.png",
 				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg",
 				 "kumoStop.png", "kumoFollow.png"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
-		Q.compileSheets("cursor.png", "cursor.json");
+		Q.compileSheets("kumo.png", "kumo.json");
+		//Q.compileSheets("cursor.png", "cursor.json");
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
 	});
@@ -55,6 +56,12 @@ var game = function(){
 	Q.animations("hattori_anim", {
 		//attack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/30, flip: false, loop:false, next:"stand", trigger: "attackFin"}, 
 		stand: { frames: [0], rate: 1/10, flip:false}
+	});
+	
+	Q.animations("kumo_anim", {
+		kumo_stand: { frames: [0], loop: true, rate: 1, flip: false},
+		kumo_walk: { frames: [1,2], loop: true, rate: 1/2, flip: false},
+		kumo_attack: { frames: [3], loop: true, rate: 1, flip: false}
 	});
 		
 		
@@ -83,7 +90,8 @@ var game = function(){
 
 	document.addEventListener('contextmenu', function(e){
 						e.preventDefault(); 
-						kumo.rush();}, false);
+						kumo.rush();
+					}, false);
 	
 	
 	////////////////////////////////////////////////////////////////////
@@ -497,6 +505,7 @@ var game = function(){
 			this.p.coldownAttack = 150;
 			this.p.vel = 350;
 			
+			this.p.katana = new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir, owner: this.p.id});
 			var kat = this.p.katana;
 		},
 		
@@ -537,11 +546,11 @@ var game = function(){
 		},
 		
 		step: function(dt){
-			console.log(this.p.alert);
+			//console.log(this.p.alert);
 			if(this.p.first){
-				this.kat = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir, owner: this.p.id}));
+				this.kat = this.stage.insert(this.p.katana);
 				this.p.cono = this.stage.insert(new Q.Cono());
-				this.p.first=false;
+				this.p.first = false;
 			}
 			if(this.kat.p.attacking){
 				this.kat.p.opacity = 1;
@@ -636,6 +645,45 @@ var game = function(){
 		stand: { frames: [0], rate: 1 }
 	});
 
+	////////////////////////////////////////////////////////////////
+	///////////////////////////// CONO /////////////////////////////
+	////////////////////////////////////////////////////////////////
+	
+	Q.Sprite.extend("Cono",{
+		init:function(p){
+			this._super(p, {
+				asset:"cono.png",
+				x: 500,
+				y: 800,
+				opacity: 0.5,
+				alert: false,
+				scale:1
+			});
+			this.p.sensor=true;
+			this.on("hit", this, "hit");
+			this.size(true);
+			Q._generatePoints(this,true);
+		},
+		
+		hit: function(collision){
+			
+			if(collision.obj.isA("Hattori") || (collision.obj.isA("Shuriken") && !collision.obj.p.enemy)){
+				this.p.alert = true;
+				//console.log(collision.obj.className);
+			}
+		},
+		
+		changeDir: function(angle){
+			this.p.angle = angle;
+		},
+		
+		step:function(dt){
+			this.p.alert = false;
+		}
+		
+	});
+	
+	
 	
 	////////////////////////////////////////////////////////////////////
 	///////////////////////      KUMO       ////////////////////////////
@@ -644,46 +692,49 @@ var game = function(){
 	Q.Sprite.extend("Kumo", {
 		init: function(p) {
 			this._super(p, {
-				asset: "kumo-jailed.png",
-				scale: 0.2,
+				sheet: "kumo_sheet",
+				sprite: "kumo_anim",
+				scale: 0.3,
 				x: 4500,
 				y: 500,
 				v: 0,
 				dir: 0,
-				vel: 350,
+				vel: 400,
 				firstLevel: true,
 				attacking: false,
 				lastCollision: "",
 				stopped: false,
 				health: 20
 			});
-			this.add('2d, tween');
+			this.add('2d, animation, tween');
 
 			if(this.p.firstLevel){
 				this.on("hit", this, "win");
+				//this.p.asset = "kumo-jailed.png";
+				this.p.scale = 0.2;
 			}else{
 				this.on("hit", this, "strike");
+				
 			}
+			this.size(true);
 		},
 
 		rush: function(){
-			console.log("ataque de kumo");
 			if(!this.p.firstLevel){
-				this.p.dir = this.trigonometry(mousex, mousey);
+				var finX = mousex*Q.width/window.innerWidth - Q.width/2 + hattori.p.x;
+				var finY = mousey*Q.height/window.innerHeight - Q.height/2 + hattori.p.y;
+				this.p.dir = this.trigonometry(finX, finY);
 				this.p.attacking = true;
 				this.p.lastCollision = "";
-				var self = this;
-				this.animate({speed: 1000, 
-								x: (mousex*Q.width/window.innerWidth - Q.width/2 + hattori.p.x), 
-								y: (mousey*Q.height/window.innerHeight - Q.height/2 + hattori.p.y), 
-								vx: -30*Math.sin(this.p.dir*(Math.PI/180)), 
-								vy: 30*Math.cos(this.p.dir*(Math.PI/180))
-							}, 0.2, {callback: function(){
+				var self = this;	
+				this.animate({	
+								x: finX, y: finY
+							}, (this.distance(finX, finY)/1000), {callback: function(){
 													self.p.stopped = true;
 													self.p.vx = 0;
 													self.p.vy = 0;
 													Q.state.set("kumoMode", "kumoStop.png");
-													self.p.attacking = false;	
+													self.p.attacking = false;
 							}});
 			}
 		},
@@ -692,6 +743,12 @@ var game = function(){
 			if(this.p.attacking){
 				if(collision.obj.isA("TileLayer")){
 					this.stop();
+					this.p.stopped = true;
+					this.p.vx = 0;
+					this.p.vy = 0;
+					Q.state.set("kumoMode", "kumoStop.png");
+					this.p.attacking = false;
+					
 				}else if(collision.obj instanceof Q.Enemy){
 					if(this.p.lastCollision != collision.obj.p.id){
 						collision.obj.hurt(20);
@@ -716,9 +773,9 @@ var game = function(){
 			}
 		},
 				
-		distance: function(){
-			var x = this.p.x - hattori.p.x;
-			var y = this.p.y - hattori.p.y;
+		distance: function(finX, finY){
+			var x = this.p.x - finX;
+			var y = this.p.y - finY;
 			
 			return Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
 		},
@@ -740,15 +797,23 @@ var game = function(){
 		},
 		
 		step: function(){
-			if(!this.p.firstLevel && !this.p.stopped){
-				this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
-				if(this.distance() < hattori.p.h*1.5){
+			if(!this.p.firstLevel){
+				if(!this.p.attacking)
+					this.p.dir = this.trigonometry(hattori.p.x, hattori.p.y);
+				
+				this.p.angle = -this.p.dir-180;
+				if(this.distance(hattori.p.x, hattori.p.y) < hattori.p.h*1.5 && !this.p.attacking){
+					this.play("kumo_walk");
 					this.p.v = -this.p.vel;
 				}
-				else if(this.distance() < hattori.p.h*2){
+				else if((this.distance(hattori.p.x, hattori.p.y) < hattori.p.h*2 || this.p.stopped) && !this.p.attacking){
+					this.play("kumo_stand");
 					this.p.v=0;
-				}
-				else{
+				}else if(this.p.attacking){
+					
+					this.play("kumo_attack");
+				}else{
+					this.play("kumo_walk");
 					this.p.v = this.p.vel;
 				}
 				this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
@@ -975,41 +1040,6 @@ var game = function(){
 
 	});*/
 	
-	///////////////////////////// Cono /////////////////////////////
-	Q.Sprite.extend("Cono",{
-		init:function(p){
-			this._super(p, {
-				asset:"cono.png",
-				x: 500,
-				y: 800,
-				opacity: 0.5,
-				alert: false,
-				scale:1
-			});
-			this.p.sensor=true;
-			this.on("hit", this, "hit");
-			this.size(true);
-			Q._generatePoints(this,true);
-		},
-		
-		hit: function(collision){
-			
-			if(collision.obj.isA("Hattori") || (collision.obj.isA("Shuriken") && !collision.obj.p.enemy)){
-				this.p.alert = true;
-				//console.log(collision.obj.className);
-			}
-		},
-		
-		changeDir: function(angle){
-			this.p.angle = angle;
-		},
-		
-		step:function(dt){
-			this.p.alert = false;
-		}
-		
-	});
-	
 	
 	
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -1090,7 +1120,7 @@ var game = function(){
 			"swords.jpg",
 			"valley.jpg",
 			"valley.jpg",
-			"kumo.png",
+			"kumo-jailed.png",
 			"hatt2.jpg"];
 	
 	function scaleToQuintus(w, h, greater){
@@ -1115,7 +1145,7 @@ var game = function(){
 		
 		
 		var fondo = box.insert(new Q.Sprite({x: Q.width/2, y: Q.height/2, asset: imagesIntro[iter]})); 
-		if(fondo.p.asset == "kumo.png")
+		if(fondo.p.asset == "kumo-jailed.png")
 			fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, false);
 		else
 			fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, true);
@@ -1144,10 +1174,10 @@ var game = function(){
 		if(iter == introduction.length-1) txt = "Jugar";	//last
 		
 		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
-									fill: "rgba(100, 100, 100, 0.5)", label: txt
+									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
 						})); 
 		var skip = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 7*Q.height/8, font: "15pt",
-									fill: "rgba(100, 100, 100, 0.5)", label: "Omitir"
+									fill: "rgba(100, 100, 100, 0.5)", label: "Omitir", w: Q.width/6
 						})); 
 		
 		iter++;
@@ -1208,7 +1238,7 @@ var game = function(){
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
 		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
-		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
+		//var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
 		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		/*var enemies=[];
@@ -1219,6 +1249,7 @@ var game = function(){
 		//var enemy = stage.insert(new Q.Shooter({}));
 		var enemy1 = stage.insert(new Q.Melee({}));
 		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60}));
+		enemy2.p.katana.p.scale *= 2;
 		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
 		var enemy4 = stage.insert(new Q.Shooter({x:3600, y:700, dir: 0}));
 		var enemy5 = stage.insert(new Q.Shooter({x:3600, y:2500}));
