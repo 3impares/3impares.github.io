@@ -600,6 +600,11 @@ var game = function(){
 				console.log("visto");
 				this.p.alert=300;
 				if(this.p.state == 0){
+					if(this.p.turning){
+						this.stop();
+						this.p.turning = false;
+						console.log("dont stop me now");
+					}
 					this.p.cono.p.asset = "cono_grande.png";
 					this.p.cono.size(true);
 					Q._generatePoints(this.p.cono,true);
@@ -741,7 +746,7 @@ var game = function(){
 		
 		strike: function(collision){
 			if(this.p.attacking){
-				if(collision.obj.isA("TileLayer")){
+				if(collision.obj.isA("TileLayer") || collision.obj.isA("Hattori")){
 					this.stop();
 					this.p.stopped = true;
 					this.p.vx = 0;
