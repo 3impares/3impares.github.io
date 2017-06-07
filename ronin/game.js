@@ -662,6 +662,7 @@ var game = function(){
 				y: 800,
 				opacity: 0.5,
 				alert: false,
+				dir: 0,
 				scale:1
 			});
 			this.p.sensor=true;
@@ -683,7 +684,19 @@ var game = function(){
 		},
 		
 		step:function(dt){
+			console.log("mi step");
+			this.p.angle = -this.p.dir-90;
 			this.p.alert = false;
+			var dx=this.p.h*Math.cos(this.p.dir*Math.PI/180)+this.p.w*Math.sin(this.p.dir*Math.PI/180)/2;
+			var dy=this.p.w*Math.cos(this.p.dir*Math.PI/180)+this.p.h*Math.sin(this.p.dir*Math.PI/180)/2;
+			if(dx<0)dx=-dx;
+			if(dy<0)dy=-dy;
+			if(hattori.p.x > this.p.x - dx && hattori.p.x < this.p.x + dx){
+				if(hattori.p.y > this.p.y - dy && hattori.p.y < this.p.y + dy){
+					this.p.alert=true;
+					console.log("te veo");
+				}
+			}
 		}
 		
 	});
@@ -1181,7 +1194,7 @@ var game = function(){
 		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
 						})); 
-		var skip = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 7*Q.height/8, font: "15pt",
+		var skip = box.insert(new Q.UI.Button({x: 1*Q.width/4, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: "Omitir", w: Q.width/6
 						})); 
 		

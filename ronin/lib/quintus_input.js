@@ -642,6 +642,8 @@ Quintus.Input = function(Q) {
       var keypad = Q.input.keypad,
           ctx = Q.ctx;
 
+		  
+	  var size = keypad.size / 2;
       ctx.save();
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -650,19 +652,19 @@ Quintus.Input = function(Q) {
         var control = keypad.controls[i];
 
         if(control[0]) {
-          ctx.font = "bold " + (keypad.size/2) + "px arial";
+          ctx.font = "bold " + (size/2) + "px arial";
           var x = keypad.left + i * keypad.unit + keypad.gutter,
               y = keypad.bottom - keypad.unit,
               key = Q.inputs[control[0]];
 
           ctx.fillStyle = keypad.color || "#FFFFFF";
           ctx.globalAlpha = key ? 1.0 : 0.5;
-          ctx.fillRect(x,y,keypad.size,keypad.size);
+          ctx.fillRect(x,y,size,size);
 
           ctx.fillStyle = keypad.text || "#000000";
           ctx.fillText(control[1],
-                       x+keypad.size/2,
-                       y+keypad.size/2);
+                       x+size/2,
+                       y+size/2);
         }
       }
 
