@@ -25,6 +25,7 @@ var game = function(){
 
 		 
 	var maxHealth = 1000;
+	var maxKumoHealth = 30;
 	var maxShurikens = 20;
 
 	Q.state.set({
@@ -32,10 +33,11 @@ var game = function(){
 		shurikens: maxShurikens,
 		weapon: "leonard-katana.png",
 		kumoMode: "kumoFollow.png",
+		kumo_health: maxKumoHealth,
 		enemies: 0,
 		state: false
 	});
-	Q.state.on("change.health, change.shurikens, change.weapon, change.kumoMode, change.state", function(){
+	Q.state.on("change.health, change.kumo-health, change.shurikens, change.weapon, change.kumoMode, change.state", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
@@ -60,7 +62,7 @@ var game = function(){
 	
 	Q.animations("kumo_anim", {
 		kumo_stand: { frames: [0], loop: true, rate: 1, flip: false},
-		kumo_walk: { frames: [1,2], loop: true, rate: 1/2, flip: false},
+		kumo_walk: { frames: [1,0,2,0], loop: true, rate: 1/2, flip: false},
 		kumo_attack: { frames: [3], loop: true, rate: 1, flip: false}
 	});
 		
@@ -662,7 +664,6 @@ var game = function(){
 				y: 800,
 				opacity: 0.5,
 				alert: false,
-				dir: 0,
 				scale:1
 			});
 			this.p.sensor=true;
@@ -684,19 +685,7 @@ var game = function(){
 		},
 		
 		step:function(dt){
-			console.log("mi step");
-			this.p.angle = -this.p.dir-90;
 			this.p.alert = false;
-			var dx=this.p.h*Math.cos(this.p.dir*Math.PI/180)+this.p.w*Math.sin(this.p.dir*Math.PI/180)/2;
-			var dy=this.p.w*Math.cos(this.p.dir*Math.PI/180)+this.p.h*Math.sin(this.p.dir*Math.PI/180)/2;
-			if(dx<0)dx=-dx;
-			if(dy<0)dy=-dy;
-			if(hattori.p.x > this.p.x - dx && hattori.p.x < this.p.x + dx){
-				if(hattori.p.y > this.p.y - dy && hattori.p.y < this.p.y + dy){
-					this.p.alert=true;
-					console.log("te veo");
-				}
-			}
 		}
 		
 	});
@@ -721,14 +710,13 @@ var game = function(){
 				firstLevel: true,
 				attacking: false,
 				lastCollision: "",
-				stopped: false,
-				health: 20
+				stopped: false
 			});
 			this.add('2d, animation, tween');
 
 			if(this.p.firstLevel){
 				this.on("hit", this, "win");
-				//this.p.asset = "kumo-jailed.png";
+				this.p.asset = "kumo-jailed.png";
 				this.p.scale = 0.2;
 			}else{
 				this.on("hit", this, "strike");
@@ -738,9 +726,10 @@ var game = function(){
 		},
 
 		rush: function(){
-			if(!this.p.firstLevel){
-				var finX = mousex*Q.width/window.innerWidth - Q.width/2 + hattori.p.x;
-				var finY = mousey*Q.height/window.innerHeight - Q.height/2 + hattori.p.y;
+			var finX = mousex*Q.width/window.innerWidth - Q.width/2 + hattori.p.x;
+			var finY = mousey*Q.height/window.innerHeight - Q.height/2 + hattori.p.y;
+			
+			if(!this.p.firstLevel && (finX != this.p.x) && (finY != this.p.y)){
 				this.p.dir = this.trigonometry(finX, finY);
 				this.p.attacking = true;
 				this.p.lastCollision = "";
@@ -748,10 +737,6 @@ var game = function(){
 				this.animate({	
 								x: finX, y: finY
 							}, (this.distance(finX, finY)/1000), {callback: function(){
-													self.p.stopped = true;
-													self.p.vx = 0;
-													self.p.vy = 0;
-													Q.state.set("kumoMode", "kumoStop.png");
 													self.p.attacking = false;
 							}});
 			}
@@ -761,10 +746,6 @@ var game = function(){
 			if(this.p.attacking){
 				if(collision.obj.isA("TileLayer") || collision.obj.isA("Hattori")){
 					this.stop();
-					this.p.stopped = true;
-					this.p.vx = 0;
-					this.p.vy = 0;
-					Q.state.set("kumoMode", "kumoStop.png");
 					this.p.attacking = false;
 					
 				}else if(collision.obj instanceof Q.Enemy){
@@ -785,8 +766,8 @@ var game = function(){
 		},
 		
 		hurt: function(damage){
-			this.p.health -= damage;
-			if(this.p.health <= 0){
+			Q.state.inc("kumo_health", -10);
+			if(Q.state.get("kumo_health") <= 0){
 				this.die();
 			}
 		},
@@ -980,10 +961,20 @@ var game = function(){
 		if(collision.obj.isA("Hattori") && !this.p.catched){
 			this.p.catched = true;
 			
-			if((Q.state.get("health") + 30) > maxHealth) 
+			if((Q.state.get("health") + 50) > maxHealth) 
 				Q.state.set({health: maxHealth});
 			else
-				Q.state.inc("health", 30);
+				Q.state.inc("health", 50);
+			
+			this.destroy();
+		}
+		else if(collision.obj.isA("Kumo") && !collision.obj.p.firstLevel && !this.p.catched){
+			this.p.catched = true;
+			
+			if((Q.state.get("kumo_health") + 10) > maxKumoHealth) 
+				Q.state.set({kumo_health: maxKumoHealth});
+			else
+				Q.state.inc("kumo_health", 10);
 			
 			this.destroy();
 		}
@@ -1068,7 +1059,7 @@ var game = function(){
 	
 	
 	Q.scene("HUD", function(stage) {
-		var sh = new Q.UI.Text({x: 100, y: 5, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
+		var sh = new Q.UI.Text({x: 100, y: 5, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health"), color: "#707070", outlineWidth: 3});
   		var weapon = new Q.Sprite({scale:0.2, x: sh.p.w+sh.p.x, y: 40, asset: Q.state.get("weapon")});
 		var kumoMode = new Q.Sprite({scale:0.2, x: weapon.p.x+(weapon.p.w*weapon.p.scale)+20, y: 40, asset: Q.state.get("kumoMode")});
 		var box = stage.insert(new Q.UI.Container({x: 0, y: 0}));
@@ -1232,7 +1223,7 @@ var game = function(){
 		Q.clearStages();
 
 		Q.state.set({health: maxHealth, shurikens: maxShurikens});
-		Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+		Q.state.on("change.health, change.kumo_health, change.shurikens, change.weapon, change.state", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
@@ -1256,13 +1247,9 @@ var game = function(){
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
 		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
-		//var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
+		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
 		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
-		/*var enemies=[];
-		for(var i=0; i<46; i++){
-			enemies[i]=stage.insert(new Q.Enemy({x:(i+10)*100}));
-		}*/
 		
 		//var enemy = stage.insert(new Q.Shooter({}));
 		var enemy1 = stage.insert(new Q.Melee({}));
