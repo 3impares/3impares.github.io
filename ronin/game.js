@@ -488,7 +488,7 @@ var game = function(){
 			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
 			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
 			
-			this.p.cono.changeDir(this.p.angle);
+			this.p.cono.p.dir=this.p.dir;
 
 			//gamestate
 		}
@@ -628,7 +628,7 @@ var game = function(){
 			this.p.cono.p.x = this.p.x + (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.cos(this.p.dir*Math.PI/180);
 			this.p.cono.p.y = this.p.y - (this.p.h*this.p.scale/2+this.p.cono.p.h*this.p.cono.p.scale/2)*Math.sin(this.p.dir*Math.PI/180);
 			
-			this.p.cono.changeDir(this.p.angle);
+			this.p.cono.p.dir=this.p.dir;
 			
 			this.kat.p.angle = this.p.angle;
 			
@@ -680,12 +680,19 @@ var game = function(){
 			}
 		},
 		
-		changeDir: function(angle){
-			this.p.angle = angle;
-		},
 		
 		step:function(dt){
+			this.p.angle = -this.p.dir-90;
 			this.p.alert = false;
+			var dx=(this.p.h*this.p.scale*Math.cos(this.p.dir*Math.PI/180)+this.p.w*this.p.scale*Math.sin(this.p.dir*Math.PI/180))/2;
+			var dy=(this.p.w*this.p.scale*Math.cos(this.p.dir*Math.PI/180)+this.p.h*this.p.scale*Math.sin(this.p.dir*Math.PI/180))/2;
+			
+			if((hattori.p.x > this.p.x - dx && hattori.p.x < this.p.x + dx)||(hattori.p.x < this.p.x - dx && hattori.p.x > this.p.x + dx)){
+				if((hattori.p.y > this.p.y - dy && hattori.p.y < this.p.y + dy)||(hattori.p.y < this.p.y - dy && hattori.p.y > this.p.y + dy)){
+					this.p.alert=true;
+					console.log("te veo");
+				}
+			}
 		}
 		
 	});
@@ -1252,8 +1259,8 @@ var game = function(){
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		
 		//var enemy = stage.insert(new Q.Shooter({}));
-		var enemy1 = stage.insert(new Q.Melee({}));
-		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60}));
+		var enemy1 = stage.insert(new Q.Melee({dir: 0}));
+		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60,dir: 90}));
 		enemy2.p.katana.p.scale *= 2;
 		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
 		var enemy4 = stage.insert(new Q.Shooter({x:3600, y:700, dir: 0}));
