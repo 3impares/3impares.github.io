@@ -137,7 +137,7 @@ var game = function(){
 			//console.log("kumo mode");
 			if(!kumo.p.firstLevel){
 				if(!kumo.p.stopped){
-					kumo.p.vel = 0;
+					kumo.p.v = 0;
 					kumo.p.stopped = true;
 					Q.state.set("kumoMode", "kumoStop.png");
 				}else{
@@ -684,12 +684,12 @@ var game = function(){
 		step:function(dt){
 			this.p.angle = -this.p.dir-90;
 			this.p.alert = false;
-			var dx=(this.p.h*this.p.scale*Math.cos(this.p.dir*Math.PI/180)+this.p.w*this.p.scale*Math.sin(this.p.dir*Math.PI/180))/2;
-			var dy=(this.p.w*this.p.scale*Math.cos(this.p.dir*Math.PI/180)+this.p.h*this.p.scale*Math.sin(this.p.dir*Math.PI/180))/2;
+			var dx = (this.p.h*this.p.scale*Math.cos(this.p.dir*Math.PI/180)+this.p.w*this.p.scale*Math.sin(this.p.dir*Math.PI/180))/2;
+			var dy = (this.p.w*this.p.scale*Math.cos(this.p.dir*Math.PI/180)+this.p.h*this.p.scale*Math.sin(this.p.dir*Math.PI/180))/2;
 			
-			if((hattori.p.x > this.p.x - dx && hattori.p.x < this.p.x + dx)||(hattori.p.x < this.p.x - dx && hattori.p.x > this.p.x + dx)){
-				if((hattori.p.y > this.p.y - dy && hattori.p.y < this.p.y + dy)||(hattori.p.y < this.p.y - dy && hattori.p.y > this.p.y + dy)){
-					this.p.alert=true;
+			if(((hattori.p.x > this.p.x - dx) && (hattori.p.x < this.p.x + dx))||((hattori.p.x < this.p.x - dx) && (hattori.p.x > this.p.x + dx))){
+				if(((hattori.p.y > this.p.y - dy) && (hattori.p.y < this.p.y + dy))||((hattori.p.y < this.p.y - dy) && (hattori.p.y > this.p.y + dy))){
+					this.p.alert = true;
 					console.log("te veo");
 				}
 			}
