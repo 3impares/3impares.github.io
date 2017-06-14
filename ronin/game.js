@@ -1095,24 +1095,25 @@ var game = function(){
 
 		var button2 = box.insert(new Q.UI.Button({ x: 0, y: 60, fill: "rgba(100, 100, 100, 1)", border: "2px", stroke: "rgba(51, 50, 50, 1)",
 											   shadow: true, shadowColor: "rgba(51, 50, 50, 0.5)", 
-											   label: "Play Again" }));        
+											   label: "Play Again" }, 
+									 function() {
+										Q.clearStages();
+
+										Q.state.set({health: maxHealth, shurikens: maxShurikens});
+										Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+											Q.stageScene("HUD", 1, 
+												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
+												});
+										
+										Q.stageScene('level1', 0);
+										Q.stageScene('HUD', 1);
+									}));        
 		
 		var label = box.insert(new Q.UI.Text({cx: button2.width/2, y: -10 - button2.p.h,
 											label: stage.options.label }));
 											
-		button2.on("click", function() {
-			Q.clearStages();
-
-			Q.state.set({health: maxHealth, shurikens: maxShurikens});
-			Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
-				Q.stageScene("HUD", 1, 
-					{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
-					});
-			
-			Q.stageScene('level1', 0);
-			Q.stageScene('HUD', 1);
-		});
 		box.fit(20);
+		
 	});
 
 	var iter = 0;
@@ -1191,36 +1192,21 @@ var game = function(){
 		
 		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
-						})); 
+						},  function(){
+									if(iter < introduction.length){
+										Q.stageScene("intro_0", 0);
+										Q.stageScene("intro_1", 1);
+										Q.stageScene("intro_2", 2);
+									}else{
+										init();
+									}
+								})); 
 		var skip = box.insert(new Q.UI.Button({x: 1*Q.width/4, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: "Omitir", w: Q.width/6
-						})); 
+						}, function(){ init(); } )); 
 		
 		iter++;
 		
-		next.on("click", function(){
-			if(iter < introduction.length){
-				Q.stageScene("intro_0", 0);
-				Q.stageScene("intro_1", 1);
-				Q.stageScene("intro_2", 2);
-			}else{
-				init();
-			}
-		});
-		
-		skip.on("click", function(){
-			init();
-		});
-		
-		next.on("touchend", function(){
-			if(iter < introduction.length){
-				Q.stageScene("intro_0", 0);
-				Q.stageScene("intro_1", 1);
-				Q.stageScene("intro_2", 2);
-			}else{
-				init();
-			}
-		});
 		//document.addEventListener("keyup", listener);
 		//document.addEventListener("touchend", init);
 		
