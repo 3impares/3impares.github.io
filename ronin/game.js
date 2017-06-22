@@ -54,7 +54,7 @@ var game = function(){
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
 	});
-	Q.load([ "AncientEvil.mp3", "Persecucion.mp3" , "Cuack.mp3" , "Cuchilla.mp3", "Patito.mp3", "Shuriken.mp3", "Win.mp3", "Lost.mp3"], function() {});
+	Q.load([ "AncientEvil.mp3", "Persecucion.mp3" , "Cuack.mp3" , "Cuchilla.mp3", "Patito.mp3", "Shuriken.mp3", "Win.mp3", "Lost.mp3", "Wilhelm.mp3"], function() {});
 
 	Q.animations("hattori_anim", {
 		//attack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/30, flip: false, loop:false, next:"stand", trigger: "attackFin"}, 
@@ -102,11 +102,11 @@ var game = function(){
 	function audioController(audio){
 		if(audio=="AncientEvil" && audioState!=1){
 			audioState=1;
-			Q.audio.stop();
+			Q.audio.stop("Persecucion.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
 		}else if(audio=="Persecucion" && audioState!=2){
 			audioState=2;
-			Q.audio.stop();
+			Q.audio.stop("AncientEvil.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
 		}
 
@@ -402,6 +402,7 @@ var game = function(){
 		die: function(){
 			this.p.cono.destroy();
 			this.destroy();
+			Q.audio.play("Wilhelm.mp3",{ loop: false });
 			if(this.p.state==1){
 				Q.state.inc("enemies", -1);
 				checkState();
@@ -536,7 +537,7 @@ var game = function(){
 			this.kat.destroy();
 			this.destroy();
 			Q.audio.stop();
-			Q.audio.play("Lost.mp3",{ loop: false });
+			Q.audio.play("Wilhelm.mp3",{ loop: false });
 			if(this.p.state==1){
 				Q.state.inc("enemies", -1);
 				checkState();
