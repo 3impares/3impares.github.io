@@ -11,7 +11,7 @@ http://gaia.fdi.ucm.es/files/people/pedro/slides/dvi/04canvas.html
 var game = function(){
 
 
-	var Q = window.Q = Quintus({ audioSupported: [ 'ogg', 'mp3' ]})
+	var Q = window.Q = Quintus({ audioSupported: [ 'mp3', 'ogg' ]})
 		 .include("Sprites, Scenes, Input, 2D, TMX, Anim, Touch, UI, Audio")
 		 // Maximize this game to whatever the size of the browser is
 		 .setup({ maximize: true })
@@ -54,6 +54,7 @@ var game = function(){
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
 	});
+	Q.load([ "AncientEvil.mp3", "Persecucion.mp3" , "Cuack.mp3" , "Cuchilla.mp3", "Patito.mp3", "Shuriken.mp3", "Win.mp3", "Lost.mp3"], function() {});
 
 	Q.animations("hattori_anim", {
 		//attack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/30, flip: false, loop:false, next:"stand", trigger: "attackFin"}, 
@@ -95,7 +96,22 @@ var game = function(){
 						kumo.rush();
 					}, false);
 	
-	
+
+	var audioState=0;
+
+	function audioController(audio){
+		if(audio=="AncientEvil" && audioState!=1){
+			audioState=1;
+			Q.audio.stop();
+			Q.audio.play(audio+".mp3",{ loop: true });	
+		}else if(audio=="Persecucion" && audioState!=2){
+			audioState=2;
+			Q.audio.stop();
+			Q.audio.play(audio+".mp3",{ loop: true });	
+		}
+
+	};
+
 	////////////////////////////////////////////////////////////////////
 	//////////////////////      HATTORI       //////////////////////////
 	////////////////////////////////////////////////////////////////////
@@ -134,6 +150,7 @@ var game = function(){
 		},
 		
 		kumoMode: function(){
+			Q.audio.play("Patito.mp3",{ loop: false });	
 			//console.log("kumo mode");
 			if(!kumo.p.firstLevel){
 				if(!kumo.p.stopped){
@@ -150,10 +167,12 @@ var game = function(){
 		
 		changeAttack: function(){
 			if(!this.p.attackType){
+				Q.audio.play("Cuchilla.mp3",{ loop: false });	
 				this.p.attackType = true;
 				Q.state.set("weapon", "leonard-katana.png");
 			}
 			else{
+				Q.audio.play("Shuriken.mp3",{ loop: false });	
 				this.p.attackType = false;
 				Q.state.set("weapon", "sh.png");
 				
@@ -172,6 +191,7 @@ var game = function(){
 			var kat = this.kat.p;
 			if(this.p.attackType){ //sword attack
 				if(this.p.coldownAttack==0){
+					Q.audio.play("Cuchilla.mp3",{ loop: false });
 					this.p.coldownAttack=50;
 					kat.attacking = true;
 					this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
@@ -192,7 +212,7 @@ var game = function(){
 			}else{	//shuriken attack
 				if(this.p.coldownAttack==0 && Q.state.get("shurikens")>0){
 					this.p.coldownAttack = 50;
-					
+					Q.audio.play("Shuriken.mp3",{ loop: false });
 					var shuriken = this.stage.insert(new Q.Shuriken({x: this.p.x, y: this.p.y, dir:this.p.dir, shooter: this.className}));
 					
 					Q.state.inc("shurikens", -1);
@@ -515,6 +535,8 @@ var game = function(){
 			this.p.cono.destroy();
 			this.kat.destroy();
 			this.destroy();
+			Q.audio.Stop();
+			Q.audio.play("Lost.mp3",{ loop: false });
 			if(this.p.state==1){
 				Q.state.inc("enemies", -1);
 				checkState();
@@ -599,13 +621,14 @@ var game = function(){
 			}
 			
 			if(this.p.cono.p.alert){
-				console.log("visto");
+				//console.log("visto");
+
 				this.p.alert=300;
 				if(this.p.state == 0){
 					if(this.p.turning){
 						this.stop();
 						this.p.turning = false;
-						console.log("dont stop me now");
+						//console.log("dont stop me now");
 					}
 					this.p.cono.p.asset = "cono_grande.png";
 					this.p.cono.size(true);
@@ -642,8 +665,10 @@ var game = function(){
 	
 	function checkState(){
 		if(Q.state.get("enemies") > 0){
+			audioController("Persecucion");
 			Q.state.set("state", true);
 		}else{
+			audioController("AncientEvil");
 			Q.state.set("state", false);
 		}
 	}
@@ -690,7 +715,7 @@ var game = function(){
 			if(((hattori.p.x > this.p.x - dx) && (hattori.p.x < this.p.x + dx))||((hattori.p.x < this.p.x - dx) && (hattori.p.x > this.p.x + dx))){
 				if(((hattori.p.y > this.p.y - dy) && (hattori.p.y < this.p.y + dy))||((hattori.p.y < this.p.y - dy) && (hattori.p.y > this.p.y + dy))){
 					this.p.alert = true;
-					console.log("te veo");
+					//console.log("te veo");
 				}
 			}
 		}
@@ -733,6 +758,7 @@ var game = function(){
 		},
 
 		rush: function(){
+			Q.audio.play("Cuack.mp3",{ loop: false });	
 			var finX = mousex*Q.width/window.innerWidth - Q.width/2 + hattori.p.x;
 			var finY = mousey*Q.height/window.innerHeight - Q.height/2 + hattori.p.y;
 			
@@ -765,9 +791,11 @@ var game = function(){
 
 		},
 		
-		win: function(collision){
+		win: function(collision){	
 			if(collision.obj.isA("Hattori")){
 				collision.obj.del('platformerControls');
+				Q.audio.Stop();
+				Q.audio.play("Win.mp3",{ loop: false });
 				Q.stageScene("endGame", 2, {win: true, label: "You release the quacking!!"});
 			}
 		},
@@ -788,6 +816,8 @@ var game = function(){
 		
 		die: function(){
 			this.destroy();
+			Q.audio.Stop();
+			Q.audio.play("Lost.mp3",{ loop: false });
 			Q.stageScene("endGame", 2, {win: false, label: "Kumo dies. Try again!"});
 		},
 		
@@ -871,7 +901,7 @@ var game = function(){
 			}else{
 			
 				if((collision.obj instanceof Q.Enemy) && this.p.shooter != collision.obj.p.id){ //si da enemigo que no lo lanzó
-					console.log("es un enemy y no coincide el id. Fuego amigo!");
+					//console.log("es un enemy y no coincide el id. Fuego amigo!");
 					collision.obj.hurt(10);
 
 					if(!collision.obj.isA("Cono") && !(collision.obj.isA("Katana") && !collision.obj.p.attacking)){
@@ -1237,6 +1267,7 @@ var game = function(){
 		// Create a new scene called level 1
 	Q.scene('level1', function(stage) {
 		Q.stageTMX("mapa2.tmx", stage);
+ 		audioController("AncientEvil");
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
 		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
