@@ -535,7 +535,7 @@ var game = function(){
 			this.p.cono.destroy();
 			this.kat.destroy();
 			this.destroy();
-			Q.audio.Stop();
+			Q.audio.stop();
 			Q.audio.play("Lost.mp3",{ loop: false });
 			if(this.p.state==1){
 				Q.state.inc("enemies", -1);
@@ -742,7 +742,8 @@ var game = function(){
 				firstLevel: true,
 				attacking: false,
 				lastCollision: "",
-				stopped: false
+				stopped: false,
+				end:false
 			});
 			this.add('2d, animation, tween');
 
@@ -793,13 +794,18 @@ var game = function(){
 		
 		win: function(collision){	
 			if(collision.obj.isA("Hattori")){
+				this.epic();
 				collision.obj.del('platformerControls');
-				Q.audio.Stop();
-				Q.audio.play("Win.mp3",{ loop: false });
 				Q.stageScene("endGame", 2, {win: true, label: "You release the quacking!!"});
 			}
 		},
-		
+		epic: function(){
+			if(!this.p.epic){
+				Q.audio.stop();
+				Q.audio.play("Win.mp3",{ loop: false });
+				this.p.epic=true;
+			}
+		},
 		hurt: function(damage){
 			Q.state.inc("kumo_health", -10);
 			if(Q.state.get("kumo_health") <= 0){
@@ -816,7 +822,7 @@ var game = function(){
 		
 		die: function(){
 			this.destroy();
-			Q.audio.Stop();
+			Q.audio.stop();
 			Q.audio.play("Lost.mp3",{ loop: false });
 			Q.stageScene("endGame", 2, {win: false, label: "Kumo dies. Try again!"});
 		},
