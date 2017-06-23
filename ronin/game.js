@@ -24,7 +24,7 @@ var game = function(){
 	var idEnemy = 0;
 
 		 
-	var maxHealth = 1000;
+	var maxHealth = 100;
 	var maxKumoHealth = 30;
 	var maxShurikens = 20;
 
@@ -102,6 +102,7 @@ var game = function(){
 	function audioController(audio){
 		if(audio=="AncientEvil" && audioState!=1){
 			audioState=1;
+			Q.audio.stop("Lost.mp3");
 			Q.audio.stop("Persecucion.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
 		}else if(audio=="Persecucion" && audioState!=2){
@@ -231,6 +232,9 @@ var game = function(){
 		die: function(){
 			this.destroy();
 			this.kat.destroy();
+			Q.audio.stop();
+			Q.audio.play("Lost.mp3", { loop: false });
+			audioState=0;
 			//aparece scene de fin de juego
 			Q.stageScene("endGame", 2, {win: false, label: "Hattori dies. Try again!"});
 		},
@@ -536,7 +540,6 @@ var game = function(){
 			this.p.cono.destroy();
 			this.kat.destroy();
 			this.destroy();
-			Q.audio.stop();
 			Q.audio.play("Wilhelm.mp3",{ loop: false });
 			if(this.p.state==1){
 				Q.state.inc("enemies", -1);
@@ -804,6 +807,7 @@ var game = function(){
 			if(!this.p.epic){
 				Q.audio.stop();
 				Q.audio.play("Win.mp3",{ loop: false });
+				audioState=0;
 				this.p.epic=true;
 			}
 		},
@@ -824,6 +828,7 @@ var game = function(){
 		die: function(){
 			this.destroy();
 			Q.audio.stop();
+			audioState=0;
 			Q.audio.play("Lost.mp3",{ loop: false });
 			Q.stageScene("endGame", 2, {win: false, label: "Kumo dies. Try again!"});
 		},
@@ -1193,6 +1198,7 @@ var game = function(){
 	};
 	
 	Q.scene('intro_0', function(stage) {  //Scene Fondo intro
+		Q.audio.play("AncientEvil.mp3",{ loop: true });	
 		var box = stage.insert(new Q.UI.Container({
 			cx: Q.height/2, cy: Q.height/2, fill: "rgba(0,0,0,1)"
 		}));
@@ -1263,16 +1269,43 @@ var game = function(){
 	};
 
 
-	Q.loadTMX("goout.tmx",function() {
+	Q.loadTMX("mapa2.tmx",function() {
 		Q.stageScene("intro_0", 0);
 		Q.stageScene("intro_1", 1);
 		Q.stageScene("intro_2", 2);
 	});
-
+	Q.loadTMX("goout.tmx",function() {});
 
 	// ## Level1 scene
 		// Create a new scene called level 1
 	Q.scene('level1', function(stage) {
+		Q.stageTMX("mapa2.tmx", stage);
+ 		audioController("AncientEvil");
+		center = stage.add("viewport");
+		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
+		//kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
+		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
+		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
+		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
+		
+		//var enemy = stage.insert(new Q.Shooter({}));
+		var enemy1 = stage.insert(new Q.Melee({dir: 0}));
+		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60,dir: 90}));
+		enemy2.p.katana.p.scale *= 2;
+		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
+		var enemy4 = stage.insert(new Q.Shooter({x:3600, y:700, dir: 0}));
+		var enemy5 = stage.insert(new Q.Shooter({x:3600, y:2500}));
+		var enemy6 = stage.insert(new Q.Shooter({x:3600, y:1500, dir: 0}));
+		var enemy7 = stage.insert(new Q.Shooter({x:5600, y:700}));
+		var enemy8 = stage.insert(new Q.Shooter({x:6600, y:700}));
+		var enemy9 = stage.insert(new Q.Shooter({x:6400, y:1700}));
+		var enemy10 = stage.insert(new Q.Shooter({x:6400, y:2700}));
+		
+		center.follow(hattori, {x:true, y:true});
+	});
+    
+
+Q.scene('level2', function(stage) {
 		Q.stageTMX("goout.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
@@ -1297,5 +1330,5 @@ var game = function(){
 		
 		center.follow(hattori, {x:true, y:true});
 	});
-    
+
 }
