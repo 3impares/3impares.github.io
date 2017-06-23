@@ -34,11 +34,10 @@ var game = function(){
 		weapon: "leonard-katana.png",
 		kumoMode: "kumoFollow.png",
 		kumo_health: maxKumoHealth,
-		kumo_cold: 1000,
 		enemies: 0,
 		state: false
 	});
-	Q.state.on("change.health, change.kumo-health, change.shurikens, change.weapon, change.kumoMode, change.state, change.kumo_cold", function(){
+	Q.state.on("change.health, change.kumo-health, change.shurikens, change.weapon, change.kumoMode, change.state", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
@@ -98,7 +97,7 @@ var game = function(){
 
 	document.addEventListener('contextmenu', function(e){
 						e.preventDefault(); 
-						if(kumoBoolean && Q.state.get("kumo_cold")==0) kumo.rush();
+						kumo.rush();
 					}, false);
 	
 
@@ -106,7 +105,6 @@ var game = function(){
 	var fin=false;
 
 	function audioController(audio){
-		console.log(audioState+" "+audio);
 		if(audio=="AncientEvil" && audioState!=1){
 			audioState=1;
 			Q.audio.stop("Lost.mp3");
@@ -120,8 +118,8 @@ var game = function(){
 			Q.audio.stop("Win.mp3");
 			Q.audio.stop("AncientEvil.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
-		}else if(audio=="Duel"){
-			fin=true;
+		}else {
+			fin=true
 			audioState=3;
 			Q.audio.stop();
 			Q.audio.play(audio+".mp3",{ loop: true });
@@ -699,7 +697,6 @@ var game = function(){
 				audioController("AncientEvil");
 			Q.state.set("state", false);
 		}
-		console.log(Q.state.get("enemies"));
 	}
 
 	Q.animations('enemy anim', {
@@ -803,7 +800,6 @@ var game = function(){
 													self.p.attacking = false;
 							}});
 			}
-			Q.state.set("kumo_cold", 1000);
 		},
 		
 		strike: function(collision){
@@ -897,8 +893,6 @@ var game = function(){
 				}
 				this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
 				this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
-				
-				if(Q.state.get("kumo_cold") > 0) Q.state.inc("kumo_cold", -1);
 			}
 		}
 	  
@@ -1004,7 +998,7 @@ var game = function(){
 						}
 					}
 				}else{
-					
+					//console.log("ataque de enemigo");
 					if(collision.obj.isA("Hattori")){	//si da a hattori
 						collision.obj.hurt(15);
 						this.p.finAttack = true;
@@ -1120,11 +1114,8 @@ var game = function(){
 			alert.p.opacity = 1;
 		}
 		
-		var aux = ''+Q.state.get("kumo_cold");
-		time = aux.substr(0,2);
-		
 		if(kumoBoolean){
-			sh.p.label = "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health") + "\n Ready in " + time;
+			sh.p.label = "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health");
 			box.insert(kumoMode);
 		}
 		box.insert(sh);
