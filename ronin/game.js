@@ -263,8 +263,8 @@ var game = function(){
 		},
 		
 		step: function(dt){
-			console.log("x "+this.p.x);
-			console.log("y "+this.p.y);
+			//console.log("x "+this.p.x);
+			//console.log("y "+this.p.y);
 			if(this.p.first){
 				this.kat = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir}));
 				this.p.first=!this.p.first;
