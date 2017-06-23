@@ -47,10 +47,11 @@ var game = function(){
 				 "shurikenEnemy.png", "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", 
 				 "calm.png", "alert.png", "leonard-katana.png",
 				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg",
-				 "kumoStop.png", "kumoFollow.png", "bad.json", "bad.png"], function(){
+				 "kumoStop.png", "kumoFollow.png", "bad.json", "bad.png", "boss.png", "boss.json"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("kumo.png", "kumo.json");
 		Q.compileSheets("bad.png", "bad.json");
+		Q.compileSheets("boss.png", "boss.json");
 		//Q.compileSheets("cursor.png", "cursor.json");
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
@@ -262,6 +263,8 @@ var game = function(){
 		},
 		
 		step: function(dt){
+			console.log("x "+this.p.x);
+			console.log("y "+this.p.y);
 			if(this.p.first){
 				this.kat = this.stage.insert(new Q.Katana({x: this.p.x, y: this.p.y, dir:this.p.dir}));
 				this.p.first=!this.p.first;
@@ -1279,7 +1282,7 @@ var game = function(){
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
 		
-		Q.stageScene('level1', 0);
+		Q.stageScene('level2', 0);
 		Q.stageScene('HUD', 1);
 	};
 
@@ -1327,22 +1330,36 @@ Q.scene('level2', function(stage) {
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 1000}));
 		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
-		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
-		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		
-		//var enemy = stage.insert(new Q.Shooter({}));
-		var enemy1 = stage.insert(new Q.Melee({dir: 0, vx:0, vy:0}));
-		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60,dir: 90}));
-		enemy2.p.katana.p.scale *= 2;
-		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
-		var enemy4 = stage.insert(new Q.Shooter({x:3600, y:700, dir: 0}));
-		var enemy5 = stage.insert(new Q.Shooter({x:3600, y:2500}));
-		var enemy6 = stage.insert(new Q.Shooter({x:3600, y:1500, dir: 0}));
-		var enemy7 = stage.insert(new Q.Shooter({x:5600, y:700}));
-		var enemy8 = stage.insert(new Q.Shooter({x:6600, y:700}));
-		var enemy9 = stage.insert(new Q.Shooter({x:6400, y:1700}));
-		var enemy10 = stage.insert(new Q.Shooter({x:6400, y:2700}));
 		
+		// first part
+		var enemy1 = stage.insert(new Q.Melee({x:1060, y:780, patrol:0, dir: 0, patrolTime:999999}));
+		var enemy2 = stage.insert(new Q.Melee({x:350, y:360, patrol:0, dir: 0, patrolTime:999999}));
+		//var enemy3 = stage.insert(new Q.Melee({x:515, y:1060, patrol:0, dir: 180, patrolTime:999999}));
+		var enemy4 = stage.insert(new Q.Melee({x:470, y:250, patrol:0, dir: 270, patrolTime:999999}));
+		var enemy5 = stage.insert(new Q.Melee({x:1300, y:600, patrol:0, dir: 270, patrolTime:999999}));
+		var enemy6 = stage.insert(new Q.Melee({x:1750, y:1250, dir: 270, patrolTime:999999}));
+		var enemy7 = stage.insert(new Q.Melee({x:3000, y:580, patrol:0, dir: 0, patrolTime:999999}));
+		var enemy8 = stage.insert(new Q.Melee({x:3000, y:725, patrol:0, dir: 0, patrolTime:999999}));
+		
+		//second
+		var enemy9 = stage.insert(new Q.Melee({x:2850, y:1440, patrol:0, dir: 0, patrolTime:999999}));
+		var enemy10 = stage.insert(new Q.Melee({x:3500, y:1450, patrol:0, dir: 0, patrolTime:999999}));
+		var bag = stage.insert(new Q.Bag({x:2800, y:1450}));
+		var potion = stage.insert(new Q.Potion({x:2800, y:95}));
+		var enemy11 = stage.insert(new Q.Melee({x:3950, y:545, patrol:0, dir: 90, patrolTime:999999}));
+		var enemy12 = stage.insert(new Q.Melee({x:3950, y:345, patrol:0, dir: 90, patrolTime:999999}));
+		var enemy13 = stage.insert(new Q.Melee({x:3800, y:475, patrol:0, dir: 180, patrolTime:999999}));
+		var enemy14 = stage.insert(new Q.Melee({x:4095, y:475, patrol:0, dir: 180, patrolTime:999999}));
+		var enemy15 = stage.insert(new Q.Melee({x:4185, y:215, patrol:0, dir: 0, patrolTime:999999}));
+		var enemy16 = stage.insert(new Q.Melee({x:3950, y:835, patrol:20, dir: 270, patrolTime:2500}));
+		//third
+
+
+		//fourth
+
+
+
 		center.follow(hattori, {x:true, y:true});
 	});
 
