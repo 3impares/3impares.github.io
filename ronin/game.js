@@ -103,10 +103,13 @@ var game = function(){
 		if(audio=="AncientEvil" && audioState!=1){
 			audioState=1;
 			Q.audio.stop("Lost.mp3");
+			Q.audio.stop("Win.mp3");
 			Q.audio.stop("Persecucion.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
 		}else if(audio=="Persecucion" && audioState!=2){
 			audioState=2;
+			Q.audio.stop("Lost.mp3");
+			Q.audio.stop("Win.mp3");
 			Q.audio.stop("AncientEvil.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
 		}
@@ -1146,8 +1149,10 @@ var game = function(){
 											Q.stageScene("HUD", 1, 
 												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 												});
-										
-										Q.stageScene('level1', 0);
+										if(stage.options.win)
+											Q.stageScene('level2', 0);
+										else
+											Q.stageScene('level1', 0);
 										Q.stageScene('HUD', 1);
 									}));        
 		
@@ -1198,7 +1203,6 @@ var game = function(){
 	};
 	
 	Q.scene('intro_0', function(stage) {  //Scene Fondo intro
-		Q.audio.play("AncientEvil.mp3",{ loop: true });	
 		var box = stage.insert(new Q.UI.Container({
 			cx: Q.height/2, cy: Q.height/2, fill: "rgba(0,0,0,1)"
 		}));
@@ -1289,7 +1293,7 @@ var game = function(){
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		
 		//var enemy = stage.insert(new Q.Shooter({}));
-		var enemy1 = stage.insert(new Q.Melee({dir: 0}));
+		var enemy1 = stage.insert(new Q.Melee({dir: 0, vel:0}));
 		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60,dir: 90}));
 		enemy2.p.katana.p.scale *= 2;
 		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
@@ -1316,7 +1320,7 @@ Q.scene('level2', function(stage) {
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		
 		//var enemy = stage.insert(new Q.Shooter({}));
-		var enemy1 = stage.insert(new Q.Melee({dir: 0}));
+		var enemy1 = stage.insert(new Q.Melee({dir: 0, vel:0}));
 		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60,dir: 90}));
 		enemy2.p.katana.p.scale *= 2;
 		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
