@@ -1291,6 +1291,7 @@ var game = function(){
 	});
 	Q.loadTMX("goout.tmx",function() {});
 	Q.loadTMX("mapa1.tmx",function() {});
+	Q.loadTMX("mapa3.tmx",function() {});
 
 	// ## Level1 scene
 		// Create a new scene called level 1
@@ -1324,9 +1325,8 @@ Q.scene('level2', function(stage) {
 		Q.stageTMX("goout.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
-		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
-		//kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
-		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
+		hattori = stage.insert(new Q.Hattori({x: 500, y: 1000}));
+		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
 		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		
@@ -1348,10 +1348,10 @@ Q.scene('level2', function(stage) {
 
 
 Q.scene('level3', function(stage) {
-		Q.stageTMX("mapa2.tmx", stage);
+		Q.stageTMX("mapa3.tmx", stage);
  		audioController("Duel");
 		center = stage.add("viewport");
-		var offset=300;
+		var offset=600;
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 800}));
 		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
 		//var potion = stage.insert(new Q.Potion({x:6816, y:736}));
@@ -1361,25 +1361,25 @@ Q.scene('level3', function(stage) {
 		var melee=[];
 		var nmelee=5;
 		for(var i=0; i<nmelee; i++){
-			melee[i] = stage.insert(new Q.Melee({x:800, y:100*i+offset, dir:180, vel:0}));
+			melee[i] = stage.insert(new Q.Melee({x:800, y:100*i+offset, dir:180, patrol:0, patrolTime:999999}));
 		}
 
 		var shooter=[];
 		var nshooter=3;
 		for(var i=0; i<nshooter; i++){
-			shooter[i] = stage.insert(new Q.Shooter({x:1200, y:i*100+offset, dir:180, vel:0}));
+			shooter[i] = stage.insert(new Q.Shooter({x:1200, y:i*100+offset, dir:180, patrol:0, patrolTime:999999}));
 		}
 
 		var titan=[];
-		var ntitan=1;
+		var ntitan=2;
 		for(var i=0; i<ntitan; i++){
-			titan[i] = stage.insert(new Q.Melee({x:1800, y:i*100+offset, dir:180, vel:0, scale:1, health:60}));
+			titan[i] = stage.insert(new Q.Melee({x:1800, y:i*100+offset, dir:180, patrol:0, scale:1, health:60, patrolTime:999999}));
 			titan[i].p.katana.p.scale*=2;
 		}
 
 
 		var gru; //nuestro villano favorito
-		gru = stage.insert(new Q.Melee({x:2000, y:500, dir:180, vel:0, health:100}));
+		gru = stage.insert(new Q.Melee({x:2000, y:500, dir:180, patrol:0, health:200, patrolTime:999999}));
 		gru.p.sheet="bad";
 
 		center.follow(hattori, {x:true, y:true});
