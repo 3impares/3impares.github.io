@@ -27,6 +27,7 @@ var game = function(){
 	var maxHealth = 100;
 	var maxKumoHealth = 30;
 	var maxShurikens = 20;
+	var currentLevel = 1;
 
 	Q.state.set({
 		health: maxHealth,
@@ -34,10 +35,11 @@ var game = function(){
 		weapon: "leonard-katana.png",
 		kumoMode: "kumoFollow.png",
 		kumo_health: maxKumoHealth,
+		kumo_cold: 1000,
 		enemies: 0,
 		state: false
 	});
-	Q.state.on("change.health, change.kumo-health, change.shurikens, change.weapon, change.kumoMode, change.state", function(){
+	Q.state.on("change.health, change.kumo_health, change.shurikens, change.weapon, change.kumoMode, change.state, change.kumo_cold", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
@@ -97,7 +99,7 @@ var game = function(){
 
 	document.addEventListener('contextmenu', function(e){
 						e.preventDefault(); 
-						kumo.rush();
+						if(currentLevel != 1) kumo.rush();
 					}, false);
 	
 
@@ -118,7 +120,7 @@ var game = function(){
 			Q.audio.stop("Win.mp3");
 			Q.audio.stop("AncientEvil.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
-		}else {
+		}else if(audio == "Duel"){
 			fin=true
 			audioState=3;
 			Q.audio.stop();
@@ -252,8 +254,8 @@ var game = function(){
 			audioState=0;
 			//aparece scene de fin de juego
 			Q.clearStages();
-			Q.stageScene("died_0", 1);
-			Q.stageScene("died_1", 2, { label: "Hattori dies. Try again!"});
+			Q.stageScene("died_0", 0);
+			Q.stageScene("died_1", 1, { label: "Hattori dies. Try again!"});
 		},
 
      	trigonometry: function (x, y){
@@ -565,6 +567,8 @@ var game = function(){
 				Q.state.inc("enemies", -1);
 				checkState();
 			}
+			if(this.p.id == 'Enemy19' && currentLevel == 2) level2win();
+			if(this.p.id == 'Enemy10' && currentLevel == 3) level3win();
 		},
 		
 		fire: function(){
@@ -697,6 +701,14 @@ var game = function(){
 				audioController("AncientEvil");
 			Q.state.set("state", false);
 		}
+	}
+	function level2win(){
+		Q.stageScene("level3_intro_0", 0);
+		Q.stageScene("level3_intro_1", 1);
+		Q.stageScene("level3_intro_2", 2);
+	}
+	function level3win(){
+		Q.stageScene("endGame", 2, {win: false, label: "You kill Gru. You win this game."});
 	}
 
 	Q.animations('enemy anim', {
@@ -1114,8 +1126,11 @@ var game = function(){
 			alert.p.opacity = 1;
 		}
 		
+		var aux = ''+Q.state.get("kumo_cold");
+		var time = aux.substr(0,2);
+		
 		if(kumoBoolean){
-			sh.p.label = "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health");
+			sh.p.label = "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health") + "\n Ready in " + time;
 			box.insert(kumoMode);
 		}
 		box.insert(sh);
@@ -1318,7 +1333,7 @@ var game = function(){
 		
 		var txt = "Play Again";
 		
-		var next = box.insert(new Q.UI.Button({x: box.width/2, y: 3*box.height/4, font: "15pt",
+		var next = box.insert(new Q.UI.Button({x: Q.width/2, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
 						},  function(){	
 										Q.clearStages();
@@ -1348,7 +1363,7 @@ var game = function(){
 		
 		var txt = "Play Again";
 		
-		var next = box.insert(new Q.UI.Button({x: box.width/2, y: 3*box.height/4, font: "15pt",
+		var next = box.insert(new Q.UI.Button({x: Q.width/2, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
 						},  function(){	
 										Q.clearStages();
@@ -1393,7 +1408,7 @@ var game = function(){
 										Q.clearStages();
 
 										Q.state.set({health: maxHealth, shurikens: maxShurikens});
-										Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+										Q.state.on("change.health, change.shurikens, change.weapon, change.state, change.kumo_cold", function(){
 											Q.stageScene("HUD", 1, 
 												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 												});
@@ -1406,7 +1421,7 @@ var game = function(){
 		Q.clearStages();
 		
 		Q.state.set({health: maxHealth, shurikens: maxShurikens});
-		Q.state.on("change.health, change.kumo_health, change.shurikens, change.weapon, change.state", function(){
+		Q.state.on("change.health, change.kumo_health, change.shurikens, change.weapon, change.state, change.kumo_cold", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
@@ -1426,6 +1441,7 @@ var game = function(){
 		// Create a new scene called level 1
 	Q.scene('level1', function(stage) {
 		idEnemy=0;
+		currentLevel = 1;
 		Q.stageTMX("mapa2.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
@@ -1452,6 +1468,7 @@ var game = function(){
     
 Q.scene('level2', function(stage) {
 		idEnemy=0;
+		currentLevel = 2;
 		Q.stageTMX("goout.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
@@ -1503,6 +1520,7 @@ Q.scene('level2', function(stage) {
 
 Q.scene('level3', function(stage) {
 		idEnemy=0;
+		currentLevel = 3;
 		Q.stageTMX("mapa3.tmx", stage);
  		audioController("Duel");
 		center = stage.add("viewport");
