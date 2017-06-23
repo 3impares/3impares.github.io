@@ -426,6 +426,7 @@ var game = function(){
 				Q.state.inc("enemies", -1);
 				checkState();
 			}
+
 		},
 		
 		trigonometry: function (x, y){
@@ -1299,6 +1300,7 @@ var game = function(){
 	// ## Level1 scene
 		// Create a new scene called level 1
 	Q.scene('level1', function(stage) {
+		idEnemy=0;
 		Q.stageTMX("mapa2.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
@@ -1325,6 +1327,7 @@ var game = function(){
 	});
     
 Q.scene('level2', function(stage) {
+		idEnemy=0;
 		Q.stageTMX("goout.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
@@ -1333,6 +1336,7 @@ Q.scene('level2', function(stage) {
 		
 		
 		// first part
+		var potion = stage.insert(new Q.Potion({x:125, y:195}));
 		var enemy1 = stage.insert(new Q.Melee({x:1060, y:780, patrol:0, dir: 0, patrolTime:999999}));
 		var enemy2 = stage.insert(new Q.Melee({x:350, y:360, patrol:0, dir: 0, patrolTime:999999}));
 		//var enemy3 = stage.insert(new Q.Melee({x:515, y:1060, patrol:0, dir: 180, patrolTime:999999}));
@@ -1344,27 +1348,37 @@ Q.scene('level2', function(stage) {
 		
 		//second
 		var enemy9 = stage.insert(new Q.Melee({x:2850, y:1440, patrol:0, dir: 0, patrolTime:999999}));
-		var enemy10 = stage.insert(new Q.Melee({x:3500, y:1450, patrol:0, dir: 0, patrolTime:999999}));
+		var enemy10 = stage.insert(new Q.Shooter({x:3500, y:1450, patrol:0, dir: 0, patrolTime:999999}));
 		var bag = stage.insert(new Q.Bag({x:2800, y:1450}));
-		var potion = stage.insert(new Q.Potion({x:2800, y:95}));
+		var potion2 = stage.insert(new Q.Potion({x:2800, y:95}));
 		var enemy11 = stage.insert(new Q.Melee({x:3950, y:545, patrol:0, dir: 90, patrolTime:999999}));
 		var enemy12 = stage.insert(new Q.Melee({x:3950, y:345, patrol:0, dir: 90, patrolTime:999999}));
 		var enemy13 = stage.insert(new Q.Melee({x:3800, y:475, patrol:0, dir: 180, patrolTime:999999}));
 		var enemy14 = stage.insert(new Q.Melee({x:4095, y:475, patrol:0, dir: 180, patrolTime:999999}));
-		var enemy15 = stage.insert(new Q.Melee({x:4185, y:215, patrol:0, dir: 0, patrolTime:999999}));
-		var enemy16 = stage.insert(new Q.Melee({x:3950, y:835, patrol:20, dir: 270, patrolTime:2500}));
+		var enemy15 = stage.insert(new Q.Shooter({x:4185, y:215, patrol:0, dir: 0, patrolTime:999999}));
+		var enemy16 = stage.insert(new Q.Shooter({x:3950, y:835, patrol:20, dir: 270, patrolTime:2500}));
 		//third
 
+		var enemy17 = stage.insert(new Q.Shooter({x:6660, y:740, patrol:0, dir: 180, patrolTime:999999}));
+		var enemy18 = stage.insert(new Q.Melee({x:6630, y:145, health:60, patrol:0, dir: 180, patrolTime:999999}));
+		var enemy19 = stage.insert(new Q.Melee({x:6215, y:145, health:60, patrol:0, dir: 0, patrolTime:999999}));
+		enemy18.p.sheet="boss";
+		enemy19.p.sheet="boss";
+		var potion3 = stage.insert(new Q.Potion({x:6100, y:145}));
 
-		//fourth
-
-
+		var enemy20= stage.insert(new Q.Melee({x:6300, y:1265, patrol:30, dir: 90, patrolTime:4000}));
+		var fake1 = stage.insert(new Q.Potion({x:6750, y:320}));
+		var fake2 = stage.insert(new Q.Potion({x:6825, y:320}));
+		
+		var enemy21= stage.insert(new Q.Melee({x:7700, y:450, patrol:0, dir: 180, patrolTime:999999, scale:1, health:80}));
+		enemy21.p.sheet="boss";
 
 		center.follow(hattori, {x:true, y:true});
 	});
 
 
 Q.scene('level3', function(stage) {
+		idEnemy=0;
 		Q.stageTMX("mapa3.tmx", stage);
  		audioController("Duel");
 		center = stage.add("viewport");
