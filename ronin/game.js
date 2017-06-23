@@ -47,14 +47,15 @@ var game = function(){
 				 "shurikenEnemy.png", "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", 
 				 "calm.png", "alert.png", "leonard-katana.png",
 				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg",
-				 "kumoStop.png", "kumoFollow.png"], function(){
+				 "kumoStop.png", "kumoFollow.png", "bad.json", "bad.png"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("kumo.png", "kumo.json");
+		Q.compileSheets("bad.png", "bad.json");
 		//Q.compileSheets("cursor.png", "cursor.json");
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
 	});
-	Q.load([ "AncientEvil.mp3", "Persecucion.mp3" , "Cuack.mp3" , "Cuchilla.mp3", "Patito.mp3", "Shuriken.mp3", "Win.mp3", "Lost.mp3", "Wilhelm.mp3"], function() {});
+	Q.load([ "AncientEvil.mp3", "Persecucion.mp3" , "Cuack.mp3" , "Cuchilla.mp3", "Patito.mp3", "Shuriken.mp3", "Win.mp3", "Lost.mp3", "Wilhelm.mp3", "Duel.mp3"], function() {});
 
 	Q.animations("hattori_anim", {
 		//attack: { frames: [1,2,3,4,6,7,8,9,10,11,12,13], rate: 1/30, flip: false, loop:false, next:"stand", trigger: "attackFin"}, 
@@ -98,6 +99,7 @@ var game = function(){
 	
 
 	var audioState=0;
+	var final=false;
 
 	function audioController(audio){
 		if(audio=="AncientEvil" && audioState!=1){
@@ -108,11 +110,18 @@ var game = function(){
 			Q.audio.play(audio+".mp3",{ loop: true });	
 		}else if(audio=="Persecucion" && audioState!=2){
 			audioState=2;
+			Q.audio.stop("Duel.mp3");
 			Q.audio.stop("Lost.mp3");
 			Q.audio.stop("Win.mp3");
 			Q.audio.stop("AncientEvil.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
+		}else {
+			final=true
+			audioState=3;
+			Q.audio.stop();
+			Q.audio.play(audio+".mp3",{ loop: true });
 		}
+
 
 	};
 
@@ -672,10 +681,12 @@ var game = function(){
 	
 	function checkState(){
 		if(Q.state.get("enemies") > 0){
-			audioController("Persecucion");
+			if(!final)
+				audioController("Persecucion");
 			Q.state.set("state", true);
 		}else{
-			audioController("AncientEvil");
+			if(!final)
+				audioController("AncientEvil");
 			Q.state.set("state", false);
 		}
 	}
@@ -1279,6 +1290,7 @@ var game = function(){
 		Q.stageScene("intro_2", 2);
 	});
 	Q.loadTMX("goout.tmx",function() {});
+	Q.loadTMX("mapa1.tmx",function() {});
 
 	// ## Level1 scene
 		// Create a new scene called level 1
@@ -1293,7 +1305,7 @@ var game = function(){
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		
 		//var enemy = stage.insert(new Q.Shooter({}));
-		var enemy1 = stage.insert(new Q.Melee({dir: 0, vel:0}));
+		var enemy1 = stage.insert(new Q.Melee({dir: 0, vx:0, vy:0}));
 		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60,dir: 90}));
 		enemy2.p.katana.p.scale *= 2;
 		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
@@ -1308,19 +1320,18 @@ var game = function(){
 		center.follow(hattori, {x:true, y:true});
 	});
     
-
 Q.scene('level2', function(stage) {
 		Q.stageTMX("goout.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
-		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
+		//kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
 		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
 		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
 		
 		//var enemy = stage.insert(new Q.Shooter({}));
-		var enemy1 = stage.insert(new Q.Melee({dir: 0, vel:0}));
+		var enemy1 = stage.insert(new Q.Melee({dir: 0, vx:0, vy:0}));
 		var enemy2 = stage.insert(new Q.Melee({x:700, y:2000, scale: 1, health: 60,dir: 90}));
 		enemy2.p.katana.p.scale *= 2;
 		var enemy3 = stage.insert(new Q.Shooter({x:2800, y:800}));
@@ -1334,5 +1345,47 @@ Q.scene('level2', function(stage) {
 		
 		center.follow(hattori, {x:true, y:true});
 	});
+
+
+Q.scene('level3', function(stage) {
+		Q.stageTMX("mapa2.tmx", stage);
+ 		audioController("Duel");
+		center = stage.add("viewport");
+		var offset=300;
+		hattori = stage.insert(new Q.Hattori({x: 500, y: 800}));
+		kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
+		//var potion = stage.insert(new Q.Potion({x:6816, y:736}));
+		//var bag = stage.insert(new Q.Bag({x:6716, y:736}));
+		
+
+		var melee=[];
+		var nmelee=5;
+		for(var i=0; i<nmelee; i++){
+			melee[i] = stage.insert(new Q.Melee({x:800, y:100*i+offset, dir:180, vel:0}));
+		}
+
+		var shooter=[];
+		var nshooter=3;
+		for(var i=0; i<nshooter; i++){
+			shooter[i] = stage.insert(new Q.Shooter({x:1200, y:i*100+offset, dir:180, vel:0}));
+		}
+
+		var titan=[];
+		var ntitan=1;
+		for(var i=0; i<ntitan; i++){
+			titan[i] = stage.insert(new Q.Melee({x:1800, y:i*100+offset, dir:180, vel:0, scale:1, health:60}));
+			titan[i].p.katana.p.scale*=2;
+		}
+
+
+		var gru; //nuestro villano favorito
+		gru = stage.insert(new Q.Melee({x:2000, y:500, dir:180, vel:0, health:100}));
+		gru.p.sheet="bad";
+
+		center.follow(hattori, {x:true, y:true});
+});
+
+
+	
 
 }
