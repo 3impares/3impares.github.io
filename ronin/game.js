@@ -104,6 +104,7 @@ var game = function(){
 	var fin=false;
 
 	function audioController(audio){
+		console.log(audioState+" "+audio);
 		if(audio=="AncientEvil" && audioState!=1){
 			audioState=1;
 			Q.audio.stop("Lost.mp3");
@@ -117,8 +118,8 @@ var game = function(){
 			Q.audio.stop("Win.mp3");
 			Q.audio.stop("AncientEvil.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
-		}else {
-			fin=true
+		}else if(audio=="Duel"){
+			fin=true;
 			audioState=3;
 			Q.audio.stop();
 			Q.audio.play(audio+".mp3",{ loop: true });
@@ -694,6 +695,7 @@ var game = function(){
 				audioController("AncientEvil");
 			Q.state.set("state", false);
 		}
+		console.log(Q.state.get("enemies"));
 	}
 
 	Q.animations('enemy anim', {
