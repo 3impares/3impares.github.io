@@ -1263,7 +1263,7 @@ var game = function(){
 	};
 
 
-	Q.loadTMX("mapa2.tmx",function() {
+	Q.loadTMX("goout.tmx",function() {
 		Q.stageScene("intro_0", 0);
 		Q.stageScene("intro_1", 1);
 		Q.stageScene("intro_2", 2);
@@ -1273,7 +1273,7 @@ var game = function(){
 	// ## Level1 scene
 		// Create a new scene called level 1
 	Q.scene('level1', function(stage) {
-		Q.stageTMX("mapa2.tmx", stage);
+		Q.stageTMX("goout.tmx", stage);
  		audioController("AncientEvil");
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
