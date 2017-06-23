@@ -76,6 +76,7 @@ var game = function(){
 	
 	var mousex=0, mousey=0;
 	var hattori, kumo;
+	var kumoBoolean = false;
 	
 	
 	Q.el.addEventListener('mousemove',function(e) {
@@ -100,7 +101,7 @@ var game = function(){
 	
 
 	var audioState=0;
-	var final=false;
+	var fin=false;
 
 	function audioController(audio){
 		if(audio=="AncientEvil" && audioState!=1){
@@ -117,7 +118,7 @@ var game = function(){
 			Q.audio.stop("AncientEvil.mp3");
 			Q.audio.play(audio+".mp3",{ loop: true });	
 		}else {
-			final=true
+			fin=true
 			audioState=3;
 			Q.audio.stop();
 			Q.audio.play(audio+".mp3",{ loop: true });
@@ -570,7 +571,7 @@ var game = function(){
 			if(this.p.coldownAttack<=0){
 				this.p.coldownAttack=150;
 				kat.attacking = true;
-				//console.log("attack");
+				
 				this.kat.animate({angle: kat.angle+60}, 0.1, Q.Easing.Quadratic.In)
 				
 				.chain({x: (this.p.x - ((this.p.w/4+kat.w*kat.scale/2) * Math.sin(this.p.dir*Math.PI/180)))+(70)*(Math.cos(this.p.dir*Math.PI/180)),
@@ -685,11 +686,11 @@ var game = function(){
 	
 	function checkState(){
 		if(Q.state.get("enemies") > 0){
-			if(!final)
+			if(!fin)
 				audioController("Persecucion");
 			Q.state.set("state", true);
 		}else{
-			if(!final)
+			if(!fin)
 				audioController("AncientEvil");
 			Q.state.set("state", false);
 		}
@@ -1087,37 +1088,6 @@ var game = function(){
 	
 	
 	
-/*
-	/////////////////////////////cursor////////////////////
-	Q.Sprite.extend("Cursor",{
-		init:function(p){
-			this._super(p, {
-				sheet:"cursor",
-				x: mousex,
-				y: mousey
-			});
-			//this.p.sensor=true;
-		},
-		trigonometry: function (x, y){
-			var cos=(x-originX)/(originX);
-			var sin=-(y-originY)/(originY);
-			
-			angle=(Math.atan(sin/cos)/(Math.PI/180));
-			if(cos<0)angle+=180;
-
-			return angle;
-		},
-		step:function(dt){
-			this.p.x=mousex+center.x;
-			this.p.y=mousey+center.y;
-			this.p.angle=-this.trigonometry(mousex, mousey)-270;
-			
-		}
-
-	});*/
-	
-	
-	
 	//////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////   STAGES   //////////////////////////////////////////
@@ -1126,7 +1096,7 @@ var game = function(){
 	
 	
 	Q.scene("HUD", function(stage) {
-		var sh = new Q.UI.Text({x: 100, y: 5, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health"), color: "#707070", outlineWidth: 3});
+		var sh = new Q.UI.Text({x: 100, y: 5, label:  "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens"), color: "#707070", outlineWidth: 3});
   		var weapon = new Q.Sprite({scale:0.2, x: sh.p.w+sh.p.x, y: 40, asset: Q.state.get("weapon")});
 		var kumoMode = new Q.Sprite({scale:0.2, x: weapon.p.x+(weapon.p.w*weapon.p.scale)+20, y: 40, asset: Q.state.get("kumoMode")});
 		var box = stage.insert(new Q.UI.Container({x: 0, y: 0}));
@@ -1136,11 +1106,13 @@ var game = function(){
 			alert.p.opacity = 1;
 		}
 		
-		box.insert(sh);
-		box.insert(weapon);
-		if(kumo){
+		if(kumoBoolean){
+			sh.p.label = "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health");
 			box.insert(kumoMode);
 		}
+		box.insert(sh);
+		box.insert(weapon);
+		
 		box.insert(alert);
 
 	});
@@ -1166,10 +1138,12 @@ var game = function(){
 											Q.stageScene("HUD", 1, 
 												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 												});
-										if(stage.options.win)
+										if(stage.options.win){
+											kumoBoolean = true;
 											Q.stageScene('level2', 0);
-										else
+										}else{
 											Q.stageScene('level1', 0);
+										}
 										Q.stageScene('HUD', 1);
 									}));        
 		
@@ -1278,7 +1252,7 @@ var game = function(){
 	
 	function init(){
 		Q.clearStages();
-
+		
 		Q.state.set({health: maxHealth, shurikens: maxShurikens});
 		Q.state.on("change.health, change.kumo_health, change.shurikens, change.weapon, change.state", function(){
 			Q.stageScene("HUD", 1, 
