@@ -52,7 +52,6 @@ var game = function(){
 		Q.compileSheets("kumo.png", "kumo.json");
 		Q.compileSheets("bad.png", "bad.json");
 		Q.compileSheets("boss.png", "boss.json");
-		//Q.compileSheets("cursor.png", "cursor.json");
 		Q.compileSheets("enemy.png", "enemy.json");
 		Q.compileSheets("katana.png", "katana.json");
 	});
@@ -77,6 +76,7 @@ var game = function(){
 	
 	var mousex=0, mousey=0;
 	var hattori, kumo;
+	
 	
 	Q.el.addEventListener('mousemove',function(e) {
 		var rect = canvas.getBoundingClientRect();
@@ -1137,7 +1137,9 @@ var game = function(){
 		
 		box.insert(sh);
 		box.insert(weapon);
-		box.insert(kumoMode);
+		if(kumo){
+			box.insert(kumoMode);
+		}
 		box.insert(alert);
 
 	});
@@ -1282,19 +1284,16 @@ var game = function(){
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
 		
-		Q.stageScene('level2', 0);
+		Q.stageScene('level1', 0);
 		Q.stageScene('HUD', 1);
 	};
 
 
-	Q.loadTMX("mapa2.tmx",function() {
+	Q.loadTMX("mapa2.tmx, goout.tmx, mapa3.tmx",function() {
 		Q.stageScene("intro_0", 0);
 		Q.stageScene("intro_1", 1);
 		Q.stageScene("intro_2", 2);
 	});
-	Q.loadTMX("goout.tmx",function() {});
-	Q.loadTMX("mapa1.tmx",function() {});
-	Q.loadTMX("mapa3.tmx",function() {});
 
 	// ## Level1 scene
 		// Create a new scene called level 1
@@ -1303,7 +1302,6 @@ var game = function(){
  		audioController("AncientEvil");
 		center = stage.add("viewport");
 		hattori = stage.insert(new Q.Hattori({x: 500, y: 500}));
-		//kumo = stage.insert(new Q.Kumo({x: 500, y: 500, firstLevel: false}));
 		var kumo2 = stage.insert(new Q.Kumo({x: 500, y: 2500, firstLevel: true}));
 		var potion = stage.insert(new Q.Potion({x:6816, y:736}));
 		var bag = stage.insert(new Q.Bag({x:6716, y:736}));
