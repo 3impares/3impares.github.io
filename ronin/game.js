@@ -48,7 +48,8 @@ var game = function(){
 				 "shurikenEnemy.png", "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", 
 				 "calm.png", "alert.png", "leonard-katana.png",
 				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg",
-				 "kumoStop.png", "kumoFollow.png", "bad.json", "bad.png", "boss.png", "boss.json","hatt3.jpg","hatt.jpg"], function(){
+				 "kumoStop.png", "kumoFollow.png", "bad.json", "bad.png", "boss.png", "boss.json",
+				 "hatt3.jpg","hatt.jpg","crying.gif","defeated.jpg"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("kumo.png", "kumo.json");
 		Q.compileSheets("bad.png", "bad.json");
@@ -252,7 +253,9 @@ var game = function(){
 			Q.audio.play("Lost.mp3", { loop: false });
 			audioState=0;
 			//aparece scene de fin de juego
-			Q.stageScene("endGame", 2, {win: false, label: "Hattori dies. Try again!"});
+			Q.clearStages();
+			Q.stageScene("died_0", 1);
+			Q.stageScene("died_1", 2, { label: "Hattori dies. Try again!"});
 		},
 
      	trigonometry: function (x, y){
@@ -856,7 +859,9 @@ var game = function(){
 			Q.audio.stop();
 			audioState=0;
 			Q.audio.play("Lost.mp3",{ loop: false });
-			Q.stageScene("endGame", 2, {win: false, label: "Kumo dies. Try again!"});
+			Q.clearStages();
+			Q.stageScene("kumo_0", 1);
+			Q.stageScene("kumo_1", 2, { label: "Kumo dies. Try again!"});
 		},
 		
 		trigonometry: function (x, y){
@@ -1289,7 +1294,6 @@ var game = function(){
 		}));
 		
 		var txt = "Siguiente";
-		if(iter == introduction.length-1) txt = "Jugar";	//last
 		
 		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
 									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
@@ -1302,6 +1306,107 @@ var game = function(){
 												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 												});
 										Q.stageScene('level2', 0);
+								}));
+	});
+	
+	
+		Q.scene('kumo_0', function(stage) {  //Scene Fondo intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2, fill: "rgba(0,0,0,1)"
+		}));
+		var fondo = box.insert(new Q.Sprite({x: Q.width/2, y: Q.height/2, asset: "crying.gif"})); 
+		//fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, true);
+	});	
+	
+	
+	
+	Q.scene('kumo_1', function(stage) {   //Scene button next intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2
+		}));
+		
+		var txt = "Play Again";
+		
+		var next = box.insert(new Q.UI.Button({x: box.width/2, y: 3*box.height/4, font: "15pt",
+									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
+						},  function(){	
+										Q.clearStages();
+
+										Q.state.set({health: maxHealth, shurikens: maxShurikens});
+										Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+											Q.stageScene("HUD", 1, 
+												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
+												});
+										Q.stageScene('level1', 0);
+								}));
+	});
+	Q.scene('died_0', function(stage) {  
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2, fill: "rgba(0,0,0,1)"
+		}));
+		var fondo = box.insert(new Q.Sprite({x: Q.width/2, y: Q.height/2, asset: "defeated.jpg"})); 
+		fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, true);
+	});	
+	
+	
+	
+	Q.scene('died_1', function(stage) {   
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2
+		}));
+		
+		var txt = "Play Again";
+		
+		var next = box.insert(new Q.UI.Button({x: box.width/2, y: 3*box.height/4, font: "15pt",
+									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
+						},  function(){	
+										Q.clearStages();
+
+										Q.state.set({health: maxHealth, shurikens: maxShurikens});
+										Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+											Q.stageScene("HUD", 1, 
+												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
+												});
+										Q.stageScene('level1', 0);
+								}));
+	});
+	
+	
+	Q.scene('level3_intro_0', function(stage) {  //Scene Fondo intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2, fill: "rgba(0,0,0,1)"
+		}));
+		var fondo = box.insert(new Q.Sprite({x: Q.width/2, y: Q.height/2, asset: "hatt.jpg"})); 
+		fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, true);
+	});	
+	
+	Q.scene('level3_intro_1', function(stage) {   //Scene texto intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2
+		}));
+		var txt = box.insert(new Q.UI.Text({x: Q.width/2, y: Q.height/4, font: "25pt bold",
+									color: "#FFF", outlineWidth: 3, label: "Por fin llega el momento que tanto ansiaba Hattori,\n iba a matar a GRU,\n solo una 'pequeña' guardia lo separa de\n poder teñir de rojo, la armadura azul de su antiguo señor"
+						})); 
+	});		
+	
+	Q.scene('level3_intro_2', function(stage) {   //Scene button next intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2
+		}));
+		
+		var txt = "Siguiente";
+		
+		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
+									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
+						},  function(){	
+										Q.clearStages();
+
+										Q.state.set({health: maxHealth, shurikens: maxShurikens});
+										Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+											Q.stageScene("HUD", 1, 
+												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
+												});
+										Q.stageScene('level3', 0);
 								}));
 	});
 	
