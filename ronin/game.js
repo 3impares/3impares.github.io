@@ -47,7 +47,7 @@ var game = function(){
 				 "shurikenEnemy.png", "health-potion.png", "bag.png", "kumo-jailed.png", "kumo.png", 
 				 "calm.png", "alert.png", "leonard-katana.png",
 				 "sh.png", "city.jpg", "hatt2.jpg", "valley.jpg", "army-sun.jpg", "swords.jpg",
-				 "kumoStop.png", "kumoFollow.png", "bad.json", "bad.png", "boss.png", "boss.json"], function(){
+				 "kumoStop.png", "kumoFollow.png", "bad.json", "bad.png", "boss.png", "boss.json","hatt3.jpg","hatt.jpg"], function(){
 		Q.compileSheets("hattori.png", "hattori.json");
 		Q.compileSheets("kumo.png", "kumo.json");
 		Q.compileSheets("bad.png", "bad.json");
@@ -819,7 +819,10 @@ var game = function(){
 			if(collision.obj.isA("Hattori")){
 				this.epic();
 				collision.obj.del('platformerControls');
-				Q.stageScene("endGame", 2, {win: true, label: "You release the quacking!!"});
+				Q.stageScene("level2_intro_0", 0);
+				Q.stageScene("level2_intro_1", 1);
+				Q.stageScene("level2_intro_2", 2);
+				
 			}
 		},
 		epic: function(){
@@ -1176,7 +1179,8 @@ var game = function(){
 			"valley.jpg",
 			"valley.jpg",
 			"kumo-jailed.png",
-			"hatt2.jpg"];
+			"hatt2.jpg"
+		];
 	
 	function scaleToQuintus(w, h, greater){
 		var newWidth, newHeight;
@@ -1192,6 +1196,9 @@ var game = function(){
 		}
 		
 	};
+	
+	
+	
 	
 	Q.scene('intro_0', function(stage) {  //Scene Fondo intro
 		var box = stage.insert(new Q.UI.Container({
@@ -1249,6 +1256,46 @@ var game = function(){
 		//document.addEventListener("touchend", init);
 		
 	});
+	
+	Q.scene('level2_intro_0', function(stage) {  //Scene Fondo intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2, fill: "rgba(0,0,0,1)"
+		}));
+		var fondo = box.insert(new Q.Sprite({x: Q.width/2, y: Q.height/2, asset: "hatt3.jpg"})); 
+		fondo.p.scale = scaleToQuintus(fondo.p.w, fondo.p.h, true);
+	});	
+	
+	Q.scene('level2_intro_1', function(stage) {   //Scene texto intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2
+		}));
+		var txt = box.insert(new Q.UI.Text({x: Q.width/2, y: Q.height/4, font: "25pt bold",
+									color: "#FFF", outlineWidth: 3, label: "Recuperado su fiel compañero de batalla, solo \nle queda vengarse de aquel que osó arrebatarle\n a Kumo, su antiguo señor:\n GRU"
+						})); 
+	});		
+	
+	Q.scene('level2_intro_2', function(stage) {   //Scene button next intro
+		var box = stage.insert(new Q.UI.Container({
+			cx: Q.height/2, cy: Q.height/2
+		}));
+		
+		var txt = "Siguiente";
+		if(iter == introduction.length-1) txt = "Jugar";	//last
+		
+		var next = box.insert(new Q.UI.Button({x: 3*Q.width/4, y: 3*Q.height/4, font: "15pt",
+									fill: "rgba(100, 100, 100, 0.5)", label: txt, w: Q.width/6
+						},  function(){	
+										Q.clearStages();
+
+										Q.state.set({health: maxHealth, shurikens: maxShurikens});
+										Q.state.on("change.health, change.shurikens, change.weapon, change.state", function(){
+											Q.stageScene("HUD", 1, 
+												{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
+												});
+										Q.stageScene('level2', 0);
+								}));
+	});
+	
 	
 	function init(){
 		Q.clearStages();
