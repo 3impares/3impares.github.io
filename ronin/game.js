@@ -34,10 +34,11 @@ var game = function(){
 		weapon: "leonard-katana.png",
 		kumoMode: "kumoFollow.png",
 		kumo_health: maxKumoHealth,
+		kumo_cold: 1000,
 		enemies: 0,
 		state: false
 	});
-	Q.state.on("change.health, change.kumo-health, change.shurikens, change.weapon, change.kumoMode, change.state", function(){
+	Q.state.on("change.health, change.kumo-health, change.shurikens, change.weapon, change.kumoMode, change.state, change.kumo_cold", function(){
 			Q.stageScene("HUD", 1, 
 				{label: "Health " + Q.state.get("health") + "Shurikens "+ Q.state.get("shurikens")});
 				});
@@ -96,7 +97,7 @@ var game = function(){
 
 	document.addEventListener('contextmenu', function(e){
 						e.preventDefault(); 
-						kumo.rush();
+						if(kumoBoolean && Q.state.get("kumo_cold")==0) kumo.rush();
 					}, false);
 	
 
@@ -799,6 +800,7 @@ var game = function(){
 													self.p.attacking = false;
 							}});
 			}
+			Q.state.set("kumo_cold", 1000);
 		},
 		
 		strike: function(collision){
@@ -890,6 +892,8 @@ var game = function(){
 				}
 				this.p.vy = -this.p.v*Math.sin(this.p.dir*Math.PI/180);
 				this.p.vx = this.p.v*Math.cos(this.p.dir*Math.PI/180);
+				
+				if(Q.state.get("kumo_cold") > 0) Q.state.inc("kumo_cold", -1);
 			}
 		}
 	  
@@ -995,7 +999,7 @@ var game = function(){
 						}
 					}
 				}else{
-					//console.log("ataque de enemigo");
+					
 					if(collision.obj.isA("Hattori")){	//si da a hattori
 						collision.obj.hurt(15);
 						this.p.finAttack = true;
@@ -1111,8 +1115,11 @@ var game = function(){
 			alert.p.opacity = 1;
 		}
 		
+		var aux = ''+Q.state.get("kumo_cold");
+		time = aux.substr(0,2);
+		
 		if(kumoBoolean){
-			sh.p.label = "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health");
+			sh.p.label = "Health " + Q.state.get("health") + "\n Shurikens "+ Q.state.get("shurikens") + "\n Kumo "+ Q.state.get("kumo_health") + "\n Ready in " + time;
 			box.insert(kumoMode);
 		}
 		box.insert(sh);
